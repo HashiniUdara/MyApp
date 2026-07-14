@@ -1,0 +1,25 @@
+import { createThemedStyleSheet } from '../../config/theme';
+
+export default createThemedStyleSheet((colors) => ({
+  container: { flex: 1, padding: 20 },
+  title:     { color: colors.textPrimary, fontSize: 24, fontWeight: '800', marginBottom: 20 },
+  empty:     { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
+  emptyText: { color: colors.mutedText, fontSize: 14 },
+  columns:   { justifyContent: 'space-between' },
+  noteCard: { width: '48%', backgroundColor: colors.surface, borderRadius: 14, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: colors.surfaceAlt },
+  noteTitle: { color: colors.textPrimary, fontSize: 14, fontWeight: '700', marginBottom: 6 },
+  noteBody:  { color: colors.textSecondary, fontSize: 13, lineHeight: 18, marginBottom: 10 },
+  noteFoot:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  noteDate:  { color: colors.mutedText, fontSize: 11 },
+  fab: { position: 'absolute', bottom: 24, right: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', elevation: 8, shadowColor: colors.shadow, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 8, zIndex: 20 },
+  overlay:   { flex: 1, justifyContent: 'flex-end' },
+  backdrop:  { ...require('react-native').StyleSheet.absoluteFillObject, backgroundColor: colors.backdrop },
+  sheet: { backgroundColor: colors.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, paddingBottom: 40 },
+  handle:     { width: 40, height: 4, backgroundColor: colors.surfaceAlt, borderRadius: 2, alignSelf: 'center', marginBottom: 20 },
+  sheetTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginBottom: 16 },
+  inputTitle: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.surfaceAlt, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, color: colors.textPrimary, fontSize: 16, fontWeight: '600', marginBottom: 10 },
+  inputBody: { backgroundColor: colors.background, borderWidth: 1, borderColor: colors.surfaceAlt, borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12, color: colors.textPrimary, fontSize: 14, height: 160, marginBottom: 16 },
+  saveBtn:     { backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 14, alignItems: 'center' },
+  saveBtnDisabled: { opacity: 0.6 },
+  saveBtnText: { color: colors.textPrimary, fontWeight: '700', fontSize: 16 },
+}));

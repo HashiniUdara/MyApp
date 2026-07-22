@@ -107,7 +107,39 @@ create table if not exists transactions (
   created_at  timestamptz default now()
 );
 
--- ── 5. (removed) monthly_finance_summaries ────────────────────────
+-- ── 5. SPLIT BILL PEOPLE (per user) ─────────────────────────────
+create table if not exists split_bill_people (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  name        text not null,
+  created_at  timestamptz default now()
+);
+
+-- ── 5b. SPLIT BILL GROUPS (per user) ────────────────────────────
+create table if not exists split_bill_groups (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  name        text not null,
+  member_ids  uuid[] not null default '{}',
+  created_at  timestamptz default now()
+);
+
+-- ── 6. SPLIT BILL EXPENSES (per user) ───────────────────────────
+create table if not exists split_bill_expenses (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references auth.users(id) on delete cascade,
+  description text not null default '',
+  amount      numeric(12,2) not null check (amount > 0),
+  paid_by     uuid not null references split_bill_people(id),
+  group_id    uuid references split_bill_groups(id),
+  date        text not null,   -- 'YYYY-MM-DD'
+  split_with  uuid[] not null default '{}',
+  split_type  text not null check (split_type in ('equally','byAmount','byPercentage')) default 'equally',
+  splits      jsonb not null default '{}'::jsonb,
+  created_at  timestamptz default now()
+);
+
+-- ── 7. (removed) monthly_finance_summaries ────────────────────────
 -- This unused table was cleaned up above in step 0b. It is intentionally
 -- not re-created here. See `monthly_summaries` (step 13 below) for the
 -- table this app actually uses.
@@ -232,6 +264,28 @@ alter table transactions enable row level security;
 drop policy if exists "users manage own transactions" on transactions;
 create policy "users manage own transactions" on transactions
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- split_bill_people
+alter table split_bill_people enable row level security;
+drop policy if exists "users manage own split bill people" on split_bill_people;
+create policy "users manage own split bill people" on split_bill_people
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- split_bill_groups
+alter table split_bill_groups enable row level security;
+drop policy if exists "users manage own split bill groups" on split_bill_groups;
+create policy "users manage own split bill groups" on split_bill_groups
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- split_bill_expenses
+alter table split_bill_expenses enable row level security;
+drop policy if exists "users manage own split bill expenses" on split_bill_expenses;
+create policy "users manage own split bill expenses" on split_bill_expenses
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+alter table split_bill_expenses
+  add constraint split_bill_expenses_split_type_check
+    check (split_type in ('equally','byAmount','byPercentage'));
 
 -- todos
 alter table todos enable row level security;
@@ -500,6 +554,8 @@ grant execute on function get_year_finance_overview(int) to authenticated;
 --  INDEXES for performance
 -- ================================================================
 create index if not exists idx_transactions_user_date       on transactions (user_id, date);
+create index if not exists idx_split_bill_people_user        on split_bill_people (user_id);
+create index if not exists idx_split_bill_expenses_user      on split_bill_expenses (user_id);
 create index if not exists idx_todos_user_date               on todos (user_id, date);
 create index if not exists idx_habits_user                   on habits (user_id);
 create index if not exists idx_habit_completions_habit       on habit_completions (habit_id);

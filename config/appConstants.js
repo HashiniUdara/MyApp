@@ -73,3 +73,10 @@ export const SELF_SCROLLING_TABS = [
   'reminders',
   'graph',
 ];
+
+export const SPLIT_BILL_TABS = [
+  { id: 'expenses', labelKey: 'expensesTab' },
+  { id: 'balance', labelKey: 'balanceTab' },
+  { id: 'groups', labelKey: 'groupsTab' },
+  { id: 'people', labelKey: 'peopleTab' },
+];

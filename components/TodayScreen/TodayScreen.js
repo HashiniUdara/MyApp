@@ -19,7 +19,7 @@ function SummaryCard({ label, value, color, icon }) {
   return (
     <View style={styles.summaryCard}>
       <Ionicons name={icon} size={20} color={color} style={{ marginBottom: 8 }} />
-      <Text style={styles.summaryLabel}>{label}</Text>
+      <Text style={[styles.summaryLabel, { color }]}>{label}</Text>
       <Text style={[styles.summaryValue, { color }]}>{value}</Text>
     </View>
   );

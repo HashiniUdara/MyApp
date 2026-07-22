@@ -12,7 +12,7 @@ export default createThemedStyleSheet((colors) => ({
     flex: 1, backgroundColor: colors.surface, borderRadius: 14,
     padding: 16, borderWidth: 1, borderColor: colors.surfaceAlt, alignItems: 'flex-start',
   },
-  summaryLabel: { color: colors.mutedText, fontSize: 11, fontWeight: '600', marginBottom: 4 },
+  summaryLabel: { fontSize: 11, fontWeight: '600', marginBottom: 4 },
   summaryValue: { fontSize: 14, fontWeight: '700' },
 
   balanceCard: {

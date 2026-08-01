@@ -139,7 +139,7 @@ export default function AuthScreen() {
                 : WORDINGS.auth.resetStep2Description(resetEmail.trim())}
             </Text>
 
-            {!!success && <View style={styles.successBox}><Text style={styles.successText}>✅ {success}</Text></View>}
+            {!!success && <View style={styles.successBox}><Text style={styles.successText}> {success}</Text></View>}
             {!!error   && <Text style={styles.error}>{error}</Text>}
 
             {/* Email — always visible */}

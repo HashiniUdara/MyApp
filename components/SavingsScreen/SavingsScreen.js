@@ -227,7 +227,6 @@ export default function SavingsScreen({ userId }) {
           onPress={openNew}
           activeOpacity={0.85}
         >
-          <Ionicons name="add" size={18} color={themeColor('textOnPrimary')} />
           <Text style={styles.addBtnText}>{WORDINGS.savings.add}</Text>
         </TouchableOpacity>
 

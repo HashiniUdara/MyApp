@@ -139,6 +139,16 @@ create table if not exists split_bill_expenses (
   created_at  timestamptz default now()
 );
 
+create table if not exists split_bill_settlements (
+  id           uuid primary key default gen_random_uuid(),
+  user_id      uuid not null references auth.users(id) on delete cascade,
+  group_id     uuid not null references split_bill_groups(id),
+  from_person  uuid not null references split_bill_people(id),
+  to_person    uuid not null references split_bill_people(id),
+  amount       numeric(12,2) not null check (amount > 0),
+  created_at   timestamptz default now()
+);
+
 -- ── 7. (removed) monthly_finance_summaries ────────────────────────
 -- This unused table was cleaned up above in step 0b. It is intentionally
 -- not re-created here. See `monthly_summaries` (step 13 below) for the
@@ -281,6 +291,12 @@ create policy "users manage own split bill groups" on split_bill_groups
 alter table split_bill_expenses enable row level security;
 drop policy if exists "users manage own split bill expenses" on split_bill_expenses;
 create policy "users manage own split bill expenses" on split_bill_expenses
+  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- split_bill_settlements
+alter table split_bill_settlements enable row level security;
+drop policy if exists "users manage own split bill settlements" on split_bill_settlements;
+create policy "users manage own split bill settlements" on split_bill_settlements
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 alter table split_bill_expenses

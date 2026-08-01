@@ -149,6 +149,12 @@ export default createThemedStyleSheet((colors) => ({
     fontSize: 14,
     fontWeight: '800',
   },
+  balanceAmountSmall: {
+    color: colors.danger,
+    fontSize: 13,
+    fontWeight: '800',
+    marginRight: 8,
+  },
   balanceRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

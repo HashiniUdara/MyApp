@@ -31,6 +31,8 @@ import {
   createSplitBillExpense,
   updateSplitBillExpense,
   deleteSplitBillExpense,
+  fetchSplitBillSettlements,
+  createSplitBillSettlement,
 } from '../../store/splitBillApi';
 
 const normalizeExpense = (item) => ({
@@ -144,6 +146,9 @@ export default function SplitBillsScreen() {
   const [selectedGroupMembers, setSelectedGroupMembers] = useState([]);
   const [expenseGroupId, setExpenseGroupId] = useState(null);
   const [pendingDeleteGroup, setPendingDeleteGroup] = useState(null);
+  const [settlements, setSettlements] = useState([]);
+  const [expandedSettlementKeys, setExpandedSettlementKeys] = useState(new Set());
+  const [settlementInputs, setSettlementInputs] = useState({});
 
   const allPeople = people;
 
@@ -204,10 +209,12 @@ export default function SplitBillsScreen() {
         }
         const groupsData = await fetchSplitBillGroups(user.id);
         const expensesData = await fetchSplitBillExpenses(user.id);
+        const settlementsData = await fetchSplitBillSettlements(user.id);
         setPeople(peopleData);
         setGroups(groupsData ?? []);
         setSelectedGroupId(groupsData?.[0]?.id ?? null);
         setExpenses((expensesData ?? []).map(normalizeExpense));
+        setSettlements(settlementsData ?? []);
       } catch (error) {
         console.warn('SplitBills load error', error);
       } finally {
@@ -219,15 +226,17 @@ export default function SplitBillsScreen() {
 
   const loadData = async () => {
     if (!user?.id) return;
-    const [peopleData, groupsData, expensesData] = await Promise.all([
+    const [peopleData, groupsData, expensesData, settlementsData] = await Promise.all([
       fetchSplitBillPeople(user.id),
       fetchSplitBillGroups(user.id),
       fetchSplitBillExpenses(user.id),
+      fetchSplitBillSettlements(user.id),
     ]);
     setPeople(peopleData ?? []);
     setGroups(groupsData ?? []);
     setSelectedGroupId((current) => current ?? groupsData?.[0]?.id ?? null);
     setExpenses((expensesData ?? []).map(normalizeExpense));
+    setSettlements(settlementsData ?? []);
   };
 
   const togglePersonSelection = (personId) => {
@@ -526,10 +535,19 @@ export default function SplitBillsScreen() {
       });
     });
 
+    settlements
+      .filter((settlement) => settlement.group_id === selectedGroup.id)
+      .forEach((settlement) => {
+        const amount = Number(settlement.amount) || 0;
+        if (!(settlement.from_person in balances) || !(settlement.to_person in balances)) return;
+        balances[settlement.to_person] = (balances[settlement.to_person] ?? 0) - amount;
+        balances[settlement.from_person] = (balances[settlement.from_person] ?? 0) + amount;
+      });
+
     return Object.entries(balances)
-      .map(([personId, amount]) => ({ name: personNameById[personId] || personId, amount: Number(amount.toFixed(2)) }))
+      .map(([personId, amount]) => ({ id: personId, name: personNameById[personId] || personId, amount: Number(amount.toFixed(2)) }))
       .sort((a, b) => a.name.localeCompare(b.name));
-  }, [expenses, filteredExpenses, allPeople, personNameById, selectedGroupId, selectedGroup]);
+  }, [expenses, filteredExpenses, allPeople, personNameById, selectedGroupId, selectedGroup, settlements]);
 
   const settlementPlan = useMemo(() => {
     const creditors = balanceSummary.filter((item) => item.amount > 0);
@@ -545,8 +563,11 @@ export default function SplitBillsScreen() {
         const transferAmount = Math.min(creditor.amount, Math.abs(debtor.amount));
         if (transferAmount <= 0) return;
         transfers.push({
+          key: `${debtor.id}-${creditor.id}-${transfers.length}`,
           from: debtor.name,
           to: creditor.name,
+          fromId: debtor.id,
+          toId: creditor.id,
           amount: Number(transferAmount.toFixed(2)),
         });
         creditor.amount -= transferAmount;
@@ -556,6 +577,61 @@ export default function SplitBillsScreen() {
 
     return transfers;
   }, [balanceSummary]);
+
+  const effectiveBalanceSummary = balanceSummary;
+
+  const toggleSettlementDetails = (key) => {
+    setExpandedSettlementKeys((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  };
+
+  const updateSettlementInput = (key, value) => {
+    setSettlementInputs((current) => ({ ...current, [key]: value }));
+  };
+
+  const settleTransfer = async (key, transfer) => {
+    if (!user?.id || !selectedGroupId) return;
+    const rawValue = Number(settlementInputs[key] ?? '');
+    if (!Number.isFinite(rawValue) || rawValue <= 0) return;
+    const amountToSettle = Math.min(rawValue, transfer.amount);
+    if (amountToSettle <= 0) return;
+
+    try {
+      await createSplitBillSettlement(user.id, {
+        group_id: selectedGroupId,
+        from_person: transfer.fromId,
+        to_person: transfer.toId,
+        amount: amountToSettle,
+      });
+      await loadData();
+      setSettlementInputs((current) => ({ ...current, [key]: '' }));
+    } catch (error) {
+      console.warn('Create settlement error', error);
+    }
+  };
+
+  const settleTransferFull = async (key, transfer) => {
+    if (!user?.id || !selectedGroupId) return;
+    const amountToSettle = transfer.amount;
+    if (amountToSettle <= 0) return;
+
+    try {
+      await createSplitBillSettlement(user.id, {
+        group_id: selectedGroupId,
+        from_person: transfer.fromId,
+        to_person: transfer.toId,
+        amount: amountToSettle,
+      });
+      await loadData();
+      setSettlementInputs((current) => ({ ...current, [key]: '' }));
+    } catch (error) {
+      console.warn('Create settlement error', error);
+    }
+  };
 
   const renderGroupSelector = () => {
     if (!groups.length) return null;
@@ -666,17 +742,61 @@ export default function SplitBillsScreen() {
           <Text style={styles.emptyStateText}>{WORDINGS.splitBills.noSettled}</Text>
         </View>
       ) : (
-        settlementPlan.map((transfer, index) => (
-          <View key={`${transfer.from}-${transfer.to}-${index}`} style={styles.balanceCard}>
-            <Text style={styles.balanceText}>{transfer.from} owes {transfer.to}</Text>
-            <Text style={styles.balanceAmount}>LKR{transfer.amount.toFixed(2)}</Text>
-          </View>
-        ))
+        settlementPlan.map((transfer) => {
+          const expanded = expandedSettlementKeys.has(transfer.key);
+          const transferText = transfer.toId === user?.id
+            ? `${transfer.from} owes you`
+            : transfer.fromId === user?.id
+            ? `You owe ${transfer.to}`
+            : `${transfer.from} owes ${transfer.to}`;
+          return (
+            <View key={transfer.key} style={styles.balanceCard}>
+              <View style={{ width: '100%' }}>
+                <TouchableOpacity
+                  style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
+                  onPress={() => toggleSettlementDetails(transfer.key)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.balanceText}>{transferText}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Text style={styles.balanceAmountSmall}>LKR{transfer.amount.toFixed(2)}</Text>
+                    <Ionicons
+                      name={expanded ? 'chevron-up' : 'chevron-down'}
+                      size={20}
+                      color={themeColor('textSecondary')}
+                    />
+                  </View>
+                </TouchableOpacity>
+
+                {expanded && (
+                  <View style={{ marginTop: 10 }}>
+                    <View style={styles.splitInputRow}>
+                      <TextInput
+                        style={styles.splitInput}
+                        value={settlementInputs[transfer.key] ?? ''}
+                        onChangeText={(value) => updateSettlementInput(transfer.key, value)}
+                        placeholder="Amount"
+                        placeholderTextColor={themeColor('mutedText')}
+                        keyboardType="numeric"
+                      />
+                      <TouchableOpacity style={styles.miniButton} onPress={() => settleTransfer(transfer.key, transfer)}>
+                        <Text style={styles.miniButtonText}>Settle</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity style={styles.miniButton} onPress={() => settleTransferFull(transfer.key, transfer)}>
+                        <Text style={styles.miniButtonText}>Full</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                )}
+              </View>
+            </View>
+          );
+        })
       )}
 
       <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>Net balances</Text>
-        {balanceSummary.map((item) => (
+        {effectiveBalanceSummary.map((item) => (
           <View key={item.name} style={styles.balanceRow}>
             <Text style={styles.balanceLabel}>{item.name}</Text>
             <Text style={[styles.balanceValue, item.amount >= 0 ? styles.positive : styles.negative]}>

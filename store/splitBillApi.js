@@ -77,6 +77,21 @@ export async function createSplitBillExpense(userId, expense) {
   });
 }
 
+export async function fetchSplitBillSettlements(userId) {
+  return dbQuery('split_bill_settlements', {
+    filters: [`user_id=eq.${userId}`],
+    order: 'created_at.desc',
+  });
+}
+
+export async function createSplitBillSettlement(userId, settlement) {
+  return dbQuery('split_bill_settlements', {
+    method: 'POST',
+    body: { ...settlement, user_id: userId },
+    single: true,
+  });
+}
+
 export async function updateSplitBillExpense(id, expense) {
   return dbQuery('split_bill_expenses', {
     method: 'PATCH',

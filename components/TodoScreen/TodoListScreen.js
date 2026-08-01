@@ -15,15 +15,10 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 const buildDateRange = () => {
   const out = [];
   const today = new Date();
-  // Show today first, then 14 days forward, then 5 days back (for past viewing)
-  for (let i = 0; i <= 14; i++) {
+  // Show today first, then 30 days forward
+  for (let i = 0; i <= 30; i++) {
     const dt = new Date(today);
     dt.setDate(today.getDate() + i);
-    out.push(dt);
-  }
-  for (let i = 1; i <= 5; i++) {
-    const dt = new Date(today);
-    dt.setDate(today.getDate() - i);
     out.push(dt);
   }
   return out;

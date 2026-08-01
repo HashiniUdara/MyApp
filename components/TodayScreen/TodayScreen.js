@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore }  from '../../store/useAppStore';
@@ -9,6 +10,7 @@ import styles from './TodayScreen.styles';
 import { themeColor } from '../../config/theme';
 import {MONTHS_SHORT, WEEKDAYS} from '../../config/appConstants';
 import { WORDINGS } from '../../config/wordings';
+import { getQuickAccessItems, getQuickAccessLabel, getQuickAccessIcon } from '../../utils/quickAccess';
 
 function fmtLKR(n) {
   return n.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -30,6 +32,7 @@ export default function TodayScreen({ setActiveTab }) {
   const { todaySummary } = useTodos();
   const { habits, isDone } = useHabits();
 
+  const [quickAccessItems, setQuickAccessItems] = useState([]);
   const today = todayStr();
   const now   = new Date();
   const dateLabel = `${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS_SHORT[now.getMonth()]} ${now.getFullYear()}`;
@@ -47,6 +50,14 @@ export default function TodayScreen({ setActiveTab }) {
 
   // Todos for today
   const { total: todoTotal, completed: todoCompleted } = todaySummary;
+
+  useEffect(() => {
+    let mounted = true;
+    getQuickAccessItems().then((items) => {
+      if (mounted) setQuickAccessItems(items);
+    });
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
@@ -120,15 +131,16 @@ export default function TodayScreen({ setActiveTab }) {
       {/* Quick links */}
       <Text style={styles.sectionTitle}>{WORDINGS.todaysummary.quickAccess}</Text>
       <View style={styles.quickRow}>
-        {[
-          { label: 'notes', tab: 'notes', icon: 'document-text-outline' },
-          { label: 'split bills', tab: 'splitbills',  icon: 'receipt-outline' },
-        ].map(q => (
-          <TouchableOpacity key={q.tab} style={styles.quickBtn} onPress={() => setActiveTab(q.tab)}>
-            <Ionicons name={q.icon} size={22} color={themeColor('primary')} />
-            <Text style={styles.quickLabel}>{q.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {quickAccessItems.length > 0 ? quickAccessItems.map((itemId) => {
+          const label = getQuickAccessLabel(itemId);
+          const icon = getQuickAccessIcon(itemId);
+          return (
+            <TouchableOpacity key={itemId} style={styles.quickBtn} onPress={() => setActiveTab(itemId)}>
+              <Ionicons name={icon} size={22} color={themeColor('primary')} />
+              <Text style={styles.quickLabel}>{label}</Text>
+            </TouchableOpacity>
+          );
+        }) : null}
       </View>
     </ScrollView>
   );

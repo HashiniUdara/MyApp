@@ -32,6 +32,7 @@ export const WORDINGS = {
     reminders: 'Reminders',
     profile: 'Profile',
     settings: 'Settings',
+    splitBills: 'Split Bills',
   },
   splitBills: {
     title: 'Split Bills',
@@ -142,6 +143,7 @@ export const WORDINGS = {
     lightTheme: 'Light Theme',
     signOut: 'Sign Out',
     signOutMessage: 'Are you sure you want to sign out?',
+    quickAccess: 'Customize Quick Access',
   },
   auth: {
     forgotPassword: 'Forgot password?',

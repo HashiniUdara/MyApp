@@ -61,6 +61,7 @@ export const MORE_MENU_ITEMS = [
   { id: 'reminders', labelKey: 'reminders', icon: 'notifications-outline' },
   { id: 'profile', labelKey: 'profile', icon: 'person-circle-outline' },
   { id: 'settings', labelKey: 'settings', icon: 'settings-outline' },
+  { id: 'splitbills', labelKey: 'splitBills', icon: 'receipt-outline' },
 ];
 
 export const SELF_SCROLLING_TABS = [

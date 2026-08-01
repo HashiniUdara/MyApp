@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { fetchBudget, upsertBudget } from '../../store/budgetApi';
 import styles from './BudgetScreen.styles';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
 
 const pad = (n) => String(n).padStart(2, '0');
 const monthKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
@@ -52,7 +53,7 @@ export default function BudgetScreen({ userId, transactions = [] }) {
 
   const save = async () => {
     const value = Number(amount);
-    if (!value || value <= 0) { setError('Please enter a valid monthly budget.'); return; }
+    if (!value || value <= 0) { setError(WORDINGS.budget.enterValidBudget); return; }
     try {
       setSaving(true); setError(null);
       setBudget(await upsertBudget(userId, month, value));
@@ -62,7 +63,7 @@ export default function BudgetScreen({ userId, transactions = [] }) {
 
   return (
     <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
-      <Text style={styles.title}>Budget</Text>
+      <Text style={styles.title}>{WORDINGS.budget.title}</Text>
       <View style={styles.monthRow}>
         <TouchableOpacity style={styles.navBtn} onPress={() => changeMonth(-1)}><Ionicons name="chevron-back" size={20} color={themeColor('textPrimary')} /></TouchableOpacity>
         <Text style={styles.monthText}>{month}</Text>
@@ -70,7 +71,7 @@ export default function BudgetScreen({ userId, transactions = [] }) {
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>Monthly budget</Text>
+        <Text style={styles.label}>{WORDINGS.budget.monthlyBudget}</Text>
         <View style={styles.inputRow}>
           <TextInput style={styles.input} value={amount} onChangeText={setAmount} placeholder="Amount" placeholderTextColor={themeColor('mutedText')} keyboardType="numeric" />
           <TouchableOpacity style={styles.saveBtn} onPress={save} disabled={saving}><Text style={styles.saveText}>{saving ? 'Saving' : 'Save'}</Text></TouchableOpacity>
@@ -81,21 +82,21 @@ export default function BudgetScreen({ userId, transactions = [] }) {
       <View style={styles.progressCard}>
         <View style={styles.ringWrap}>
           <View style={styles.ringOuter}><View style={[styles.ringInner, { width: `${100 - stats.percent}%` }]} /></View>
-          <Text style={styles.percent}>{stats.percent}%</Text>
-          <Text style={styles.used}>Used</Text>
+          <Text style={styles.percent}>{stats.percent}{WORDINGS.budget.percentageSign}</Text>
+          <Text style={styles.used}>{WORDINGS.budget.used}</Text>
         </View>
         <View style={styles.amountGrid}>
-          <View style={styles.amountBox}><Text style={styles.boxLabel}>Budget</Text><Text style={styles.boxValue}>{stats.total.toFixed(2)}</Text></View>
-          <View style={styles.amountBox}><Text style={styles.boxLabel}>Spent</Text><Text style={[styles.boxValue, { color: themeColor('danger') }]}>{stats.expense.toFixed(2)}</Text></View>
-          <View style={styles.amountBox}><Text style={styles.boxLabel}>Remaining</Text><Text style={[styles.boxValue, { color: stats.left >= 0 ? themeColor('success') : themeColor('danger') }]}>{stats.left.toFixed(2)}</Text></View>
+          <View style={styles.amountBox}><Text style={styles.boxLabel}>{WORDINGS.budget.budget}</Text><Text style={styles.boxValue}>{stats.total.toFixed(2)}</Text></View>
+          <View style={styles.amountBox}><Text style={styles.boxLabel}>{WORDINGS.budget.spent}</Text><Text style={[styles.boxValue, { color: themeColor('danger') }]}>{stats.expense.toFixed(2)}</Text></View>
+          <View style={styles.amountBox}><Text style={styles.boxLabel}>{WORDINGS.budget.remaining}</Text><Text style={[styles.boxValue, { color: stats.left >= 0 ? themeColor('success') : themeColor('danger') }]}>{stats.left.toFixed(2)}</Text></View>
         </View>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Daily progress</Text>
-        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>Day</Text><Text style={styles.dailyValue}>{stats.dayNo} / {stats.daysTotal}</Text></View>
-        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>Daily budget</Text><Text style={styles.dailyValue}>{stats.dailyBudget.toFixed(2)}</Text></View>
-        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>Expected spend by today</Text><Text style={styles.dailyValue}>{stats.expectedSpend.toFixed(2)}</Text></View>
+        <Text style={styles.cardTitle}>{WORDINGS.budget.dailyProgress}</Text>
+        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>{WORDINGS.budget.day}</Text><Text style={styles.dailyValue}>{stats.dayNo} / {stats.daysTotal}</Text></View>
+        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>{WORDINGS.budget.dailyBudget}</Text><Text style={styles.dailyValue}>{stats.dailyBudget.toFixed(2)}</Text></View>
+        <View style={styles.dailyRow}><Text style={styles.dailyLabel}>{WORDINGS.budget.expectedSpend}</Text><Text style={styles.dailyValue}>{stats.expectedSpend.toFixed(2)}</Text></View>
         <View style={styles.barTrack}><View style={[styles.barFill, { width: `${stats.percent}%` }]} /></View>
       </View>
       <View style={{ height: 30 }} />

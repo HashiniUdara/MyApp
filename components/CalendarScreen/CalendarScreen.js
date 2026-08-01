@@ -3,9 +3,8 @@ import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import styles from './CalendarScreenStyles';
 import CalendarDayScreen from './CalendarDayScreen';
 import { themeColor } from '../../config/theme';
-
-const WEEKDAYS = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+import { MONTHS, WEEKDAYS_SHORT } from '../../config/appConstants';
+import { Ionicons } from '@expo/vector-icons';
 
 function buildGrid(year, month) {
   const firstDay = new Date(year, month, 1);
@@ -106,17 +105,17 @@ export default function CalendarScreen({ transactions, onAdd, onUpdate, onRemove
             </TouchableOpacity>
           </View>
           <View style={styles.dayNavRow}>
-            <TouchableOpacity style={styles.navBtn} onPress={() => moveDay(-1)}><Text style={styles.navArrow}>‹</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.navBtn} onPress={() => moveDay(-1)}><Ionicons name="chevron-back" size={20} color={themeColor('textPrimary')} /></TouchableOpacity>
             <TouchableOpacity style={styles.dayCenter} onPress={() => setSelDate(selectedDate)}>
               <Text style={styles.selectorLabel}>Day</Text>
               <Text style={styles.navTitle}>{day}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navBtn} onPress={() => moveDay(1)}><Text style={styles.navArrow}>›</Text></TouchableOpacity>
+            <TouchableOpacity style={styles.navBtn} onPress={() => moveDay(1)}><Ionicons name="chevron-forward" size={20} color={themeColor('textPrimary')} /></TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.weekRow}>
-          {WEEKDAYS.map(d => <View key={d} style={styles.weekCell}><Text style={styles.weekLabel}>{d}</Text></View>)}
+          {WEEKDAYS_SHORT.map(d => <View key={d} style={styles.weekCell}><Text style={styles.weekLabel}>{d}</Text></View>)}
         </View>
 
         <View style={styles.grid}>

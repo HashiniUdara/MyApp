@@ -34,7 +34,7 @@ export default createThemedStyleSheet((colors) => ({
   },
   navBtn: {
     width: 36, height: 36, borderRadius: 18,
-    backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center',
+    alignItems: 'center', justifyContent: 'center',
   },
   navArrow: { color: colors.textPrimary, fontSize: 22, lineHeight: 26 },
   navTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700' },

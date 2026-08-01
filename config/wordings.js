@@ -262,5 +262,20 @@ export const WORDINGS = {
     confirmDelete: 'Delete Task',
     deleteMessage: (title) => `Delete "${title}"? This can't be undone.`,
     deleteMessage2: "Are you sure you want to delete this task? This can't be undone."
+  },
+  budget: {
+    title: 'Budget',
+    monthlyBudget: 'Monthly budget',
+    dailyProgress: 'Daily progress',
+    used: 'Used',
+    budget: 'Budget',
+    spent: 'Spent',
+    remaining: 'Remaining',
+    month: 'Month',
+    enterValidBudget: 'Please enter a valid monthly budget.',
+    dailyBudget: 'Daily budget',
+    expectedSpend: 'Expected spend by today',
+    day: 'Day',
+    percentageSign: '%',
   }
 };

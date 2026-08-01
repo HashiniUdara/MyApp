@@ -6,9 +6,9 @@
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import DayView from '../DayScreen/DayView';
 import styles from './CalendarDayScreen.styles';
-
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun',
-                      'Jul','Aug','Sep','Oct','Nov','Dec'];
+import { Ionicons } from '@expo/vector-icons';
+import { themeColor } from '../../config/theme';
+import { MONTHS_SHORT } from '../../config/appConstants';
 
 function formatTitle(dateStr) {
   // 'YYYY-MM-DD' → '26 Jun 2026'
@@ -39,7 +39,7 @@ export default function CalendarDayScreen({
         {/* Header bar with back button */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.backBtn} onPress={onClose}>
-            <Text style={styles.backArrow}>‹</Text>
+            <Ionicons name="chevron-back" size={20} color={themeColor('textPrimary')} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{formatTitle(date)}</Text>
           {/* Spacer to center title */}

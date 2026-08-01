@@ -25,9 +25,6 @@ export default function ConfirmDialog({
       <View style={styles.overlay}>
         <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={onCancel} />
         <View style={styles.card}>
-          {/* <View style={[styles.iconWrap, destructive && styles.iconWrapDanger]}>
-            <Ionicons name={destructive ? 'trash-outline' : 'log-out-outline'} size={20} color={destructive ? themeColor('danger') : themeColor('accent')} />
-          </View> */}
           <Text style={styles.title}>{title}</Text>
           {!!message && <Text style={styles.message}>{message}</Text>}
 

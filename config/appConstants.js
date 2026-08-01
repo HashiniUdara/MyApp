@@ -56,7 +56,7 @@ export const MORE_MENU_ITEMS = [
   { id: 'graph', labelKey: 'financeGraph', icon: 'stats-chart-outline' },
   { id: 'budget', labelKey: 'budget', icon: 'wallet-outline' },
   { id: 'savings', labelKey: 'savings', icon: 'trophy-outline' },
-  { id: 'calculator', labelKey: 'calculator', icon: 'calculator-outline' },
+  // { id: 'calculator', labelKey: 'calculator', icon: 'calculator-outline' },
   { id: 'notes', labelKey: 'notes', icon: 'document-text-outline' },
   { id: 'reminders', labelKey: 'reminders', icon: 'notifications-outline' },
   { id: 'profile', labelKey: 'profile', icon: 'person-circle-outline' },

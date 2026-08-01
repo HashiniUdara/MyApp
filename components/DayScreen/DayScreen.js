@@ -23,7 +23,6 @@ export default function DayScreen({
   return (
     <DayView
       date={today}
-      title="Today's Summary"
       transactions={allTxns}
       onAdd={handleAdd}
       onUpdate={handleUpdate}

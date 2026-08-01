@@ -956,7 +956,7 @@ export default function SplitBillsScreen() {
       <ScrollView style={styles.content} contentContainerStyle={styles.contentInner} showsVerticalScrollIndicator={false}>
         {loading ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>{WORDINGS.common.saving}</Text>
+            <Text style={styles.emptyStateText}>{WORDINGS.common.loading}</Text>
           </View>
         ) : (
           <>

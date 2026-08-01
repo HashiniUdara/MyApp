@@ -7,6 +7,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useReminders } from '../../store/reminderStore/ReminderContext';
 import styles from './ReminderTile.style';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -77,8 +78,8 @@ export default function ReminderTile({ reminderId, style }) {
       {/* Header: label + toggle */}
       <View style={styles.headerRow}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.tileTitle}>🔔 {reminder.label}</Text>
-          <Text style={styles.tileSubtitle}>Daily reminder</Text>
+          <Text style={styles.tileTitle}>{WORDINGS.reminders.bell} {reminder.label}</Text>
+          <Text style={styles.tileSubtitle}>{WORDINGS.reminders.dailyReminder}</Text>
         </View>
         <Switch
           value={reminder.enabled}
@@ -95,7 +96,7 @@ export default function ReminderTile({ reminderId, style }) {
         activeOpacity={0.7}
       >
         <Text style={styles.timeLabel}>
-          {reminder.enabled ? 'Remind me at' : 'Will remind at'}
+          {reminder.enabled ? WORDINGS.reminders.remindMeAt : WORDINGS.reminders.willRemindAt}
         </Text>
         <View style={[styles.timeBadge, !reminder.enabled && styles.timeBadgeDisabled]}>
           <Text style={[styles.timeText, !reminder.enabled && styles.timeTextDisabled]}>
@@ -107,7 +108,7 @@ export default function ReminderTile({ reminderId, style }) {
       {/* Permission warning */}
       {permDenied && reminder.enabled && (
         <Text style={styles.permWarn}>
-          ⚠️ Notifications are disabled. Enable them in device Settings.
+          {WORDINGS.reminders.permWarn}
         </Text>
       )}
 
@@ -126,7 +127,7 @@ export default function ReminderTile({ reminderId, style }) {
           />
           <View style={styles.sheet}>
             <View style={styles.sheetHandle} />
-            <Text style={styles.sheetTitle}>Set Reminder Time</Text>
+            <Text style={styles.sheetTitle}>{WORDINGS.reminders.setReminderTime}</Text>
             <Text style={styles.sheetSub}>{reminder.label}</Text>
             <DateTimePicker
               value={pickerDate}
@@ -137,7 +138,7 @@ export default function ReminderTile({ reminderId, style }) {
               textColor={themeColor('textPrimary')}
             />
             <TouchableOpacity style={styles.saveBtn} onPress={handleIOSSave}>
-              <Text style={styles.saveBtnText}>Save</Text>
+              <Text style={styles.saveBtnText}>{WORDINGS.common.save}</Text>
             </TouchableOpacity>
           </View>
         </View>

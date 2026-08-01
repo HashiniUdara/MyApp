@@ -3,6 +3,7 @@ import TodoListScreen from './TodoListScreen';
 import TodoFormScreen from './TodoFormScreen';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { useTodos } from '../../store/todoStore/TodoContext';
+import { WORDINGS } from '../../config/wordings';
 
 export default function TodoScreen() {
   const { addTodo, updateTodo, removeTodo } = useTodos();
@@ -59,9 +60,9 @@ export default function TodoScreen() {
       />
       <ConfirmDialog
         visible={!!pendingDeleteId}
-        title="Delete Task"
-        message="Are you sure you want to delete this task? This can't be undone."
-        confirmLabel="Delete"
+        title={WORDINGS.todo.confirmDelete}
+        message={WORDINGS.todo.deleteMessage2}
+        confirmLabel={WORDINGS.common.delete}
         destructive
         onConfirm={confirmDeleteFromForm}
         onCancel={() => setPendingDeleteId(null)}

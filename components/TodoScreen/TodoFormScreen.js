@@ -9,9 +9,8 @@ import { useCategories } from '../../store/categoryStore/CategoryContext';
 import { toDateStr, parseDateStr, toTimeStr, parseTimeStr } from '../../utils/dateUtils';
 import styles from './TodoFormStyles';
 import { themeColor } from '../../config/theme';
-
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
+import { MONTHS_SHORT } from '../../config/appConstants';
+import { WORDINGS } from '../../config/wordings';
 
 function ErrorText({ message }) {
   if (!message) return null;
@@ -61,9 +60,9 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
 
   const validate = () => {
     const next = {};
-    if (!title.trim()) next.title = 'Please give this task a title';
-    else if (title.trim().length > 60) next.title = 'Title should be under 60 characters';
-    if (!category) next.category = 'Please choose a category';
+    if (!title.trim()) next.title = WORDINGS.todo.titleRequired;
+    else if (title.trim().length > 60) next.title = WORDINGS.todo.titleTooLong;
+    if (!category) next.category = WORDINGS.todo.categoryRequired;
     setErrors(next);
     return Object.keys(next).length === 0;
   };
@@ -101,18 +100,18 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
           <View style={styles.handle} />
           <ScrollView contentContainerStyle={styles.scrollInner} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
             <View style={styles.sheetHeaderRow}>
-              <Text style={styles.sheetTitle}>{isEdit ? 'Edit Task' : 'New Task'}</Text>
+              <Text style={styles.sheetTitle}>{isEdit ? WORDINGS.todo.EditTask : WORDINGS.todo.NewTask}</Text>
               <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
                 <Ionicons name="close" size={18} color={themeColor('textSecondary')} />
               </TouchableOpacity>
             </View>
 
             {/* Title */}
-            <Text style={styles.fieldLabel}>Title</Text>
+            <Text style={styles.fieldLabel}>{WORDINGS.todo.titleLabel}</Text>
             <View style={styles.inputWrap}>
               <TextInput
                 style={[styles.input, errors.title && styles.inputError]}
-                placeholder="e.g. Meeting: UX Case"
+                placeholder={WORDINGS.todo.titlePlaceholder}
                 placeholderTextColor={themeColor('mutedText')}
                 value={title}
                 onChangeText={(v) => { setTitle(v); clearError('title'); }}
@@ -123,11 +122,11 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
             {!errors.title && <View style={styles.spacer} />}
 
             {/* Notes */}
-            <Text style={styles.fieldLabel}>Notes</Text>
+            <Text style={styles.fieldLabel}>{WORDINGS.todo.notesLabel}</Text>
             <View style={styles.inputWrap}>
               <TextInput
                 style={[styles.input, styles.inputMultiline]}
-                placeholder="Add any details (optional)"
+                placeholder={WORDINGS.todo.notesPlaceholder}
                 placeholderTextColor={themeColor('mutedText')}
                 value={notes}
                 onChangeText={setNotes}
@@ -138,7 +137,7 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
             <View style={styles.spacer} />
 
             {/* Category */}
-            <Text style={styles.fieldLabel}>Category</Text>
+            <Text style={styles.fieldLabel}>{WORDINGS.todo.categoryLabel}</Text>
             <View style={styles.categoryGrid}>
               {TODO_CATEGORIES.map((c) => {
                 const active = category === c.id;
@@ -160,15 +159,15 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
             {/* Date & Time */}
             <View style={styles.rowFields}>
               <View style={styles.rowField}>
-                <Text style={styles.fieldLabel}>Date</Text>
+                <Text style={styles.fieldLabel}>{WORDINGS.todo.dateLabel}</Text>
                 <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowDatePicker(true)}>
                   <Ionicons name="calendar-outline" size={16} color={themeColor('textPrimary')} />
-                  <Text style={styles.pickerBtnText}>{`${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`}</Text>
+                  <Text style={styles.pickerBtnText}>{`${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`}</Text>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.rowField}>
-                <Text style={styles.fieldLabel}>Alarm</Text>
+                <Text style={styles.fieldLabel}>{WORDINGS.todo.Alarm}</Text>
                 <TouchableOpacity style={styles.pickerBtn} onPress={() => setShowTimePicker(true)}>
                   <Ionicons name="alarm-outline" size={16} color={themeColor('textPrimary')} />
                   <Text style={[styles.pickerBtnText, !time && styles.pickerBtnPlaceholder]}>
@@ -198,7 +197,7 @@ export default function TodoFormScreen({ visible, todo, defaultDate, onClose, on
             {isEdit && (
               <TouchableOpacity style={styles.deleteLink} onPress={() => onDelete(todo.id)}>
                 <Ionicons name="trash-outline" size={14} color={themeColor('danger')} />
-                <Text style={styles.deleteLinkText}>Delete Task</Text>
+                <Text style={styles.deleteLinkText}>{WORDINGS.todo.deleteTask}</Text>
               </TouchableOpacity>
             )}
           </ScrollView>

@@ -67,12 +67,12 @@ export const SELF_SCROLLING_TABS = [
   'day',
   'calendar',
   'habits',
-  'budget',
+    'budget',
   'savings',
   'settings',
   'reminders',
   'graph',
-];
+  ];
 
 export const SPLIT_BILL_TABS = [
   { id: 'expenses', labelKey: 'expensesTab' },
@@ -80,3 +80,12 @@ export const SPLIT_BILL_TABS = [
   { id: 'groups', labelKey: 'groupsTab' },
   { id: 'people', labelKey: 'peopleTab' },
 ];
+
+// habit emojis for selection when creating a new habit
+export const EMOJIS = ['🏃','📚','💧','🧘','💪','🥗','😴','🎯','✍️','🎵','🧹','💊','🚴','🌿','🔥','⭐'];
+
+export const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+export const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+export const WEEKDAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+export const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+

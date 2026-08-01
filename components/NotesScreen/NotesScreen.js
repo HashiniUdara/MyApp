@@ -9,6 +9,7 @@ import { useAuth } from '../../store/authStore/AuthContext';
 import { fetchNotes, createNote, updateNote, deleteNote as removeNoteFromDb } from '../../store/noteApi';
 import styles from './NotesScreen.styles';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
 
 function formatDate(value) {
   if (!value) return '';
@@ -60,7 +61,7 @@ export default function NotesScreen() {
       }
       setModal(false);
     } catch (e) {
-      Alert.alert('Save Failed', e.message || 'Unable to save note.');
+      Alert.alert(WORDINGS.common.saveFailed , e.message || WORDINGS.common.unableToSave);
     } finally {
       setSaving(false);
     }
@@ -73,7 +74,7 @@ export default function NotesScreen() {
       await removeNoteFromDb(pendingDelete.id);
       setNotes(prev => prev.filter(n => n.id !== pendingDelete.id));
     } catch (e) {
-      Alert.alert('Delete Failed', e.message || 'Unable to delete note.');
+      Alert.alert(WORDINGS.common.deleteFailed, e.message || WORDINGS.common.unableToDelete);
     } finally {
       setPendingDelete(null);
     }
@@ -94,14 +95,14 @@ export default function NotesScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Notes</Text>
+      <Text style={styles.title}>{WORDINGS.notes.title}</Text>
 
       {loading ? (
         <View style={styles.empty}><ActivityIndicator color={themeColor('primary')} /></View>
       ) : notes.length === 0 ? (
         <View style={styles.empty}>
           <Ionicons name="document-text-outline" size={40} color={themeColor('surfaceAlt')} />
-          <Text style={styles.emptyText}>No notes yet. Tap + to add one.</Text>
+          <Text style={styles.emptyText}>{WORDINGS.notes.empty}</Text>
         </View>
       ) : (
         <FlatList
@@ -121,9 +122,9 @@ export default function NotesScreen() {
 
       <ConfirmDialog
         visible={!!pendingDelete}
-        title="Delete Note"
-        message={pendingDelete ? `Delete "${pendingDelete.title || 'this note'}"? This can't be undone.` : ''}
-        confirmLabel="Delete"
+        title={WORDINGS.notes.confirmDelete}
+        message={pendingDelete ? WORDINGS.notes.deleteMessage(pendingDelete.title || 'this note') : ''}
+        confirmLabel={WORDINGS.common.delete}
         destructive
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}
@@ -134,10 +135,10 @@ export default function NotesScreen() {
           <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={() => setModal(false)} />
           <View style={styles.sheet}>
             <View style={styles.handle} />
-            <Text style={styles.sheetTitle}>{editing ? 'Edit Note' : 'New Note'}</Text>
+            <Text style={styles.sheetTitle}>{editing ? WORDINGS.notes.editNote : WORDINGS.notes.newNote}</Text>
             <TextInput
               style={styles.inputTitle}
-              placeholder="Title (optional)"
+              placeholder={WORDINGS.notes.titlePlaceholder}
               placeholderTextColor={themeColor('mutedText')}
               value={title}
               onChangeText={setTitle}
@@ -145,7 +146,7 @@ export default function NotesScreen() {
             />
             <TextInput
               style={styles.inputBody}
-              placeholder="Write your note..."
+              placeholder={WORDINGS.notes.bodyPlaceholder}
               placeholderTextColor={themeColor('mutedText')}
               value={body}
               onChangeText={setBody}
@@ -154,7 +155,7 @@ export default function NotesScreen() {
               maxLength={2000}
             />
             <TouchableOpacity style={[styles.saveBtn, saving && styles.saveBtnDisabled]} onPress={save} disabled={saving}>
-              <Text style={styles.saveBtnText}>{saving ? 'Saving...' : editing ? 'Save Changes' : 'Add Note'}</Text>
+              <Text style={styles.saveBtnText}>{saving ? WORDINGS.common.saving : editing ? WORDINGS.common.saveChanges : WORDINGS.notes.addNote}</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>

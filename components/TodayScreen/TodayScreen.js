@@ -7,9 +7,8 @@ import { useAuth }      from '../../store/authStore/AuthContext';
 import { todayStr }     from '../../utils/dateUtils';
 import styles from './TodayScreen.styles';
 import { themeColor } from '../../config/theme';
-
-const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const WEEKDAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+import {MONTHS_SHORT, WEEKDAYS} from '../../config/appConstants';
+import { WORDINGS } from '../../config/wordings';
 
 function fmtLKR(n) {
   return n.toLocaleString('en-LK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -71,11 +70,11 @@ export default function TodayScreen({ setActiveTab }) {
 
       {/* Todos summary */}
       <TouchableOpacity key={'todos'} onPress={() => setActiveTab('todos')}>
-        <Text style={styles.sectionTitle}>Todos</Text>
+        <Text style={styles.sectionTitle}>{WORDINGS.todaysummary.todoTitle}</Text>
         <View style={styles.progressCard}>
           <View style={styles.progressTop}>
             <Text style={styles.progressLabel}>
-              {todoCompleted} of {todoTotal} completed
+              {WORDINGS.todaysummary.completedTodos(todoCompleted, todoTotal)}
             </Text>
             <Text style={styles.progressPct}>
               {todoTotal > 0 ? Math.round((todoCompleted / todoTotal) * 100) : 0}%
@@ -92,11 +91,11 @@ export default function TodayScreen({ setActiveTab }) {
 
       {/* Habits summary */}
       <TouchableOpacity key={'habits'} onPress={() => setActiveTab('habits')}>
-        <Text style={styles.sectionTitle}>Habits</Text>
+        <Text style={styles.sectionTitle}>{WORDINGS.todaysummary.habitTitle}</Text>
         <View style={styles.progressCard}>
           <View style={styles.progressTop}>
             <Text style={styles.progressLabel}>
-              {habitsDone} of {habitsTotal} done today
+              {WORDINGS.todaysummary.completedHabits(habitsDone, habitsTotal)}
             </Text>
             <Text style={styles.progressPct}>{habitPct}%</Text>
           </View>
@@ -119,11 +118,11 @@ export default function TodayScreen({ setActiveTab }) {
       </TouchableOpacity>
 
       {/* Quick links */}
-      <Text style={styles.sectionTitle}>Quick Access</Text>
+      <Text style={styles.sectionTitle}>{WORDINGS.todaysummary.quickAccess}</Text>
       <View style={styles.quickRow}>
         {[
-          { label: 'notes', tab: 'notes',    icon: 'document-text-outline' },
-          { label: 'split bills',        tab: 'splitbills',  icon: 'receipt-outline' },
+          { label: 'notes', tab: 'notes', icon: 'document-text-outline' },
+          { label: 'split bills', tab: 'splitbills',  icon: 'receipt-outline' },
         ].map(q => (
           <TouchableOpacity key={q.tab} style={styles.quickBtn} onPress={() => setActiveTab(q.tab)}>
             <Ionicons name={q.icon} size={22} color={themeColor('primary')} />

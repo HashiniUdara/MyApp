@@ -4,7 +4,6 @@
  *
  * Props:
  *   date          string  'YYYY-MM-DD'  – which day to display
- *   title         string  – header text, e.g. "Today's Summary" or "26 Jun"
  *   transactions  array   – ALL transactions (store.transactions)
  *   onAdd         fn(entry)
  *   onUpdate      fn(id, entry)
@@ -17,8 +16,9 @@ import AddTransactionModal from './AddTransactionModal';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { Ionicons } from '@expo/vector-icons';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
 
-export default function DayView({ date, title, transactions, onAdd, onUpdate, onRemove, expenseCategories, incomeCategories }) {
+export default function DayView({ date, transactions, onAdd, onUpdate, onRemove, expenseCategories, incomeCategories }) {
   const [modalVisible,        setModalVisible]        = useState(false);
   const [editingTransaction,  setEditingTransaction]  = useState(null);
   const [pendingDelete,       setPendingDelete]       = useState(null);
@@ -72,10 +72,10 @@ export default function DayView({ date, title, transactions, onAdd, onUpdate, on
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{WORDINGS.dayfinance.title}</Text>
 
         {dayTxns.length === 0 && (
-          <Text style={styles.empty}>No transactions yet. Tap + to add one!</Text>
+          <Text style={styles.empty}>{WORDINGS.dayfinance.notransactions}</Text>
         )}
 
         {/* Summary cards */}
@@ -85,19 +85,19 @@ export default function DayView({ date, title, transactions, onAdd, onUpdate, on
             <Text style={[styles.summaryValue, { color: themeColor('success') }]}>{totalIncomes.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryCard}>
-            <Text style={styles.summaryLabel}>Expenses</Text>
+            <Text style={styles.summaryLabel}>{WORDINGS.dayfinance.expense}</Text>
             <Text style={[styles.summaryValue, { color: themeColor('danger') }]}>- {totalExpenses.toFixed(2)}</Text>
           </View>
           <View style={styles.summaryCard}>
-            <Text style={[styles.summaryLabel, { color: netTotal >= 0 ? themeColor('success') : themeColor('danger') }]}>Balance</Text>
+            <Text style={[styles.summaryLabel, { color: netTotal >= 0 ? themeColor('success') : themeColor('danger') }]}>{WORDINGS.dayfinance.balance}</Text>
             <Text style={[styles.summaryValue, { color: netTotal >= 0 ? themeColor('success') : themeColor('danger') }]}>{netTotal.toFixed(2)}</Text>
           </View>
         </View>
 
-        <Text style={[styles.sectionTitle, styles.netRow]}>Transactions</Text>
+        <Text style={[styles.sectionTitle, styles.netRow]}>{WORDINGS.dayfinance.transactions}</Text>
 
         {dayTxns.length === 0 ? (
-          <Text style={styles.emptyText}>No transactions added.</Text>
+          <Text style={styles.emptyText}>{WORDINGS.dayfinance.notransactions}</Text>
         ) : (
           dayTxns.map((item, index) => (
             <TouchableOpacity
@@ -130,9 +130,9 @@ export default function DayView({ date, title, transactions, onAdd, onUpdate, on
 
       <ConfirmDialog
         visible={!!pendingDelete}
-        title="Delete Transaction"
-        message={pendingDelete ? `Delete "${pendingDelete.category}"? This can't be undone.` : ''}
-        confirmLabel="Delete"
+        title={WORDINGS.dayfinance.confirmDelete}
+        message={pendingDelete ? WORDINGS.common.deleteMessage(pendingDelete.category) : ''}
+        confirmLabel={WORDINGS.common.delete}
         destructive
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}

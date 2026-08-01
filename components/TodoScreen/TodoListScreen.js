@@ -7,10 +7,8 @@ import { toDateStr, isPastDateStr, isTodayDateStr } from '../../utils/dateUtils'
 import ConfirmDialog from '../common/ConfirmDialog';
 import styles from './TodoListStyles';
 import { themeColor } from '../../config/theme';
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const WEEKDAYS_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+import { WEEKDAYS_SHORT, WEEKDAYS, MONTHS } from '../../config/appConstants';
+import { WORDINGS } from '../../config/wordings';
 
 const buildDateRange = () => {
   const out = [];
@@ -126,7 +124,7 @@ export default function TodoListScreen({ onAdd, onEdit }) {
   }
 
   const selectedDateObj = new Date(selectedDate + 'T00:00:00');
-  const subtitle = `${WEEKDAYS_FULL[selectedDateObj.getDay()]}, ${selectedDateObj.getDate()} ${MONTHS[selectedDateObj.getMonth()]}`;
+  const subtitle = `${WEEKDAYS[selectedDateObj.getDay()]}, ${selectedDateObj.getDate()} ${MONTHS[selectedDateObj.getMonth()]}`;
 
   const handleAddPress = () => {
     if (readOnly) return;
@@ -143,7 +141,7 @@ export default function TodoListScreen({ onAdd, onEdit }) {
       <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
         <View style={styles.headerRow}>
           <View>
-            <Text style={styles.title}>Todo List</Text>
+            <Text style={styles.title}>{WORDINGS.todo.title}</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
           </View>
 
@@ -166,7 +164,7 @@ export default function TodoListScreen({ onAdd, onEdit }) {
                 style={[styles.datePill, isActive && styles.datePillActive, !isActive && isToday && styles.datePillToday]}
                 onPress={() => setSelectedDate(dStr)}
               >
-                <Text style={[styles.dateDay, isActive && styles.dateDayActive]}>{WEEKDAYS[dt.getDay()]}</Text>
+                <Text style={[styles.dateDay, isActive && styles.dateDayActive]}>{WEEKDAYS_SHORT[dt.getDay()]}</Text>
                 <Text style={styles.dateNum}>{dt.getDate()}</Text>
               </TouchableOpacity>
             );
@@ -225,7 +223,7 @@ export default function TodoListScreen({ onAdd, onEdit }) {
           <View style={styles.empty}>
             <Ionicons name="clipboard-outline" size={30} color={themeColor('surfaceAlt')} />
             <Text style={styles.emptyText}>
-              {filter === 'completed' ? 'Nothing completed yet' : filter === 'active' ? 'All caught up for this day' : 'No tasks for this day'}
+              {filter === 'completed' ? WORDINGS.todo.noCompletedTasks : filter === 'active' ? WORDINGS.todo.noActiveTasks : WORDINGS.todo.noTasks}
             </Text>
           </View>
         ) : (
@@ -241,6 +239,7 @@ export default function TodoListScreen({ onAdd, onEdit }) {
             />
           ))
         )}
+        <View style={{ height: 120 }} />
       </ScrollView>
 
       {!readOnly && (
@@ -251,8 +250,8 @@ export default function TodoListScreen({ onAdd, onEdit }) {
 
       <ConfirmDialog
         visible={!!pendingDelete}
-        title="Delete Task"
-        message={pendingDelete ? `Delete "${pendingDelete.title}"? This can't be undone.` : ''}
+        title={WORDINGS.todo.confirmDelete}
+        message={pendingDelete ? WORDINGS.todo.deleteMessage(pendingDelete.title) : ''}
         confirmLabel="Delete"
         destructive
         onConfirm={confirmDelete}

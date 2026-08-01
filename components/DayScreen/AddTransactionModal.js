@@ -13,6 +13,8 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import styles from './AddTransactionModal.styles';
 import { useCategories } from '../../store/categoryStore/CategoryContext';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
+
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -203,7 +205,7 @@ export default function AddTransactionModal({
             )}
 
             {/* Category pills */}
-            <Text style={styles.label}>Category</Text>
+            <Text style={styles.label}>{WORDINGS.addTransaction.category}</Text>
             <View style={styles.pills}>
               {Object.keys(categories).map((cat) => (
                 <TouchableOpacity
@@ -219,7 +221,7 @@ export default function AddTransactionModal({
             {/* Subcategory pills */}
             {subcategories.length > 0 && (
               <>
-                <Text style={styles.label}>Subcategory</Text>
+                <Text style={styles.label}>{WORDINGS.addTransaction.subcategory}</Text>
                 <View style={styles.pills}>
                   {subcategories.map((sub) => (
                     <TouchableOpacity
@@ -246,7 +248,7 @@ export default function AddTransactionModal({
             {/* Amount */}
             <TextInput
               style={styles.input}
-              placeholder="Amount (LKR)"
+              placeholder={WORDINGS.addTransaction.amount}
               placeholderTextColor={themeColor('mutedText')}
               keyboardType="numeric"
               value={amount}
@@ -258,7 +260,7 @@ export default function AddTransactionModal({
               style={[styles.addBtn, (!category || !subcategory || !amount) && styles.addBtnDisabled]}
               onPress={handleSubmit}
             >
-              <Text style={styles.addBtnText}>{isEditing ? 'Save Changes' : 'Add'}</Text>
+              <Text style={styles.addBtnText}>{isEditing ? WORDINGS.common.saveChanges : WORDINGS.common.add}</Text>
             </TouchableOpacity>
 
           </ScrollView>

@@ -8,8 +8,9 @@ import { useHabits } from '../../store/habitStore/HabitContext';
 import ConfirmDialog from '../common/ConfirmDialog';
 import styles from './HabitListScreen.styles';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
+import { EMOJIS } from '../../config/appConstants';
 
-const EMOJIS = ['🏃','📚','💧','🧘','💪','🥗','😴','🎯','✍️','🎵','🧹','💊','🚴','🌿','🔥','⭐'];
 
 export default function HabitListScreen({ onSelectHabit }) {
   const { habits, addHabit, editHabit, removeHabit, streak, COLORS } = useHabits();
@@ -17,14 +18,14 @@ export default function HabitListScreen({ onSelectHabit }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingHabit, setEditingHabit] = useState(null);
   const [name,  setName]  = useState('');
-  const [emoji, setEmoji] = useState('🏃');
+  const [emoji, setEmoji] = useState(EMOJIS[0]);
   const [color, setColor] = useState(COLORS[0]);
   const [pendingDelete, setPendingDelete] = useState(null);
 
   const resetForm = () => {
     setEditingHabit(null);
     setName('');
-    setEmoji('🏃');
+    setEmoji(EMOJIS[0]);
     setColor(COLORS[0]);
   };
 
@@ -36,7 +37,7 @@ export default function HabitListScreen({ onSelectHabit }) {
   const openEdit = (habit) => {
     setEditingHabit(habit);
     setName(habit.name ?? '');
-    setEmoji(habit.emoji ?? '🏃');
+    setEmoji(habit.emoji ?? EMOJIS[0]);
     setColor(habit.color ?? COLORS[0]);
     setModalVisible(true);
   };
@@ -65,7 +66,7 @@ export default function HabitListScreen({ onSelectHabit }) {
         <Text style={styles.title}>Habits</Text>
 
         {habits.length === 0 && (
-          <Text style={styles.empty}>No habits yet. Tap + to add your first one!</Text>
+          <Text style={styles.empty}>{WORDINGS.habits.empty}</Text>
         )}
 
         {habits.map(habit => {
@@ -82,7 +83,7 @@ export default function HabitListScreen({ onSelectHabit }) {
               </View>
               <View style={styles.habitInfo}>
                 <Text style={styles.habitName}>{habit.name}</Text>
-                <Text style={styles.habitSub}>{s > 0 ? `🔥 ${s} day streak` : 'No streak yet'}</Text>
+                <Text style={styles.habitSub}>{s > 0 ? WORDINGS.habits.haveStreak(s) : WORDINGS.habits.noStreak}</Text>
               </View>
               <View style={styles.rowActions}>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => openEdit(habit)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
@@ -105,9 +106,9 @@ export default function HabitListScreen({ onSelectHabit }) {
 
       <ConfirmDialog
         visible={!!pendingDelete}
-        title="Delete Habit"
-        message={pendingDelete ? `Delete "${pendingDelete.name}"? This can't be undone.` : ''}
-        confirmLabel="Delete"
+        title= {WORDINGS.habits.confirmDelete}
+        message={pendingDelete ? WORDINGS.common.deleteMessage(pendingDelete.name) : ''}
+        confirmLabel={WORDINGS.common.delete}
         destructive
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}
@@ -118,18 +119,18 @@ export default function HabitListScreen({ onSelectHabit }) {
           <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={closeSheet} />
           <View style={styles.sheet}>
             <View style={styles.handle} />
-            <Text style={styles.sheetTitle}>{editingHabit ? 'Edit Habit' : 'New Habit'}</Text>
+            <Text style={styles.sheetTitle}>{editingHabit ? WORDINGS.habits.editHabit : WORDINGS.habits.newHabit}</Text>
 
             <TextInput
               style={styles.input}
-              placeholder="Habit name  (e.g. Exercise)"
+              placeholder={WORDINGS.habits.habitNamePlaceholder}
               placeholderTextColor={themeColor('mutedText')}
               value={name}
               onChangeText={setName}
               maxLength={40}
             />
 
-            <Text style={styles.sheetLabel}>Icon</Text>
+            <Text style={styles.sheetLabel}>{WORDINGS.habits.iconLabel}</Text>
             <View style={styles.emojiGrid}>
               {EMOJIS.map(e => (
                 <TouchableOpacity key={e} style={[styles.emojiOption, emoji === e && styles.emojiOptionActive]} onPress={() => setEmoji(e)}>
@@ -138,7 +139,7 @@ export default function HabitListScreen({ onSelectHabit }) {
               ))}
             </View>
 
-            <Text style={styles.sheetLabel}>Color</Text>
+            <Text style={styles.sheetLabel}>{WORDINGS.habits.colorLabel}</Text>
             <View style={styles.colorRow}>
               {COLORS.map((c, index) => (
                 <TouchableOpacity key={`${c}-${index}`} style={[styles.colorDot, { backgroundColor: c }, color === c && styles.colorDotActive]} onPress={() => setColor(c)} />
@@ -146,7 +147,7 @@ export default function HabitListScreen({ onSelectHabit }) {
             </View>
 
             <TouchableOpacity style={[styles.addBtn, !name.trim() && styles.addBtnDisabled]} onPress={handleSave}>
-              <Text style={styles.addBtnText}>{editingHabit ? 'Save Changes' : 'Add Habit'}</Text>
+              <Text style={styles.addBtnText}>{editingHabit ? WORDINGS.common.saveChanges : WORDINGS.common.add}</Text>
             </TouchableOpacity>
           </View>
         </View>

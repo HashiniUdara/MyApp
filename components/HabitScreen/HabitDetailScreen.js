@@ -3,10 +3,11 @@ import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-nati
 import { useHabits } from '../../store/habitStore/HabitContext';
 import styles from './HabitDetailScreen.styles';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
+
 
 const WEEKDAYS    = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-const MONTHS      = ['January','February','March','April','May','June',
-                      'July','August','September','October','November','December'];
+const MONTHS      = ['January','February','March','April','May','June', 'July','August','September','October','November','December'];
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -84,17 +85,17 @@ export default function HabitDetailScreen({ habit, onBack }) {
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderColor: habit.color }]}>
             <Text style={[styles.statValue, { color: habit.color }]}>{currentStreak}</Text>
-            <Text style={styles.statLabel}>🔥 Streak</Text>
+            <Text style={styles.statLabel}>{WORDINGS.habits.streak}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: habit.color }]}>
             <Text style={[styles.statValue, { color: habit.color }]}>{doneCount}</Text>
-            <Text style={styles.statLabel}>✅ This Month</Text>
+            <Text style={styles.statLabel}>{WORDINGS.habits.thisMonth}</Text>
           </View>
           <View style={[styles.statCard, { borderColor: habit.color }]}>
             <Text style={[styles.statValue, { color: habit.color }]}>
               {totalDays > 0 ? Math.round((doneCount / totalDays) * 100) : 0}%
             </Text>
-            <Text style={styles.statLabel}>📊 Rate</Text>
+            <Text style={styles.statLabel}>{WORDINGS.habits.rate}</Text>
           </View>
         </View>
 
@@ -171,14 +172,14 @@ export default function HabitDetailScreen({ habit, onBack }) {
         {/* Legend */}
         <View style={styles.legend}>
           <View style={[styles.legendDot, { backgroundColor: habit.color }]} />
-          <Text style={styles.legendText}>Completed</Text>
+          <Text style={styles.legendText}>{WORDINGS.habits.completed}</Text>
           <View style={[styles.legendDot, styles.legendDotEmpty, { borderColor: habit.color }]} />
-          <Text style={styles.legendText}>Today</Text>
+          <Text style={styles.legendText}>{WORDINGS.habits.today}</Text>
           <View style={[styles.legendDot, { backgroundColor: themeColor('surfaceAlt') }]} />
-          <Text style={styles.legendText}>Not done</Text>
+          <Text style={styles.legendText}>{WORDINGS.habits.notDone}</Text>
         </View>
 
-        <Text style={styles.hint}>Tap a day to mark / unmark it</Text>
+        <Text style={styles.hint}>{WORDINGS.habits.hint}</Text>
 
       </ScrollView>
     </View>

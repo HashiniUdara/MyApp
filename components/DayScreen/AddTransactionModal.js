@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  Modal,
   View,
   Text,
   TextInput,
@@ -138,21 +137,22 @@ export default function AddTransactionModal({
     onClose();
   };
 
+  if (!visible) return null;
+
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={handleClose}>
-      <KeyboardAvoidingView
-        style={styles.overlay}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={handleClose} />
+    <KeyboardAvoidingView
+      style={styles.overlay}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={handleClose} />
 
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
-          <Text style={styles.sheetTitle}>
-            {isEditing ? 'Edit Transaction' : 'Add Transaction'}
-          </Text>
+      <View style={styles.sheet}>
+        <View style={styles.handle} />
+        <Text style={styles.sheetTitle}>
+          {isEditing ? 'Edit Transaction' : 'Add Transaction'}
+        </Text>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}>
 
             {/* Type toggle — locked in edit mode since type shouldn't change */}
             <View style={styles.toggle}>
@@ -265,8 +265,7 @@ export default function AddTransactionModal({
 
           </ScrollView>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,7 +1,11 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  overlay:  { flex: 1, justifyContent: 'flex-end' },
+  overlay:  {
+    ...require('react-native').StyleSheet.absoluteFillObject,
+    justifyContent: 'flex-end',
+    zIndex: 1000, elevation: 1000,
+  },
   backdrop: { ...require('react-native').StyleSheet.absoluteFillObject, backgroundColor: colors.backdrop },
   sheet:    {
     backgroundColor: colors.surface,

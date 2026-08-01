@@ -1,7 +1,8 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  container: { flex: 1, padding: 20,paddingHorizontal: 24, paddingTop: 56, },
+  container: { flex: 1 },
+  contentInner: { padding: 20, paddingHorizontal: 24, paddingTop: 56, paddingBottom: 40 },
   title:     { color: colors.textPrimary, fontSize: 24, fontWeight: '800', marginBottom: 28 },
 
   avatarWrap: { alignItems: 'center', marginBottom: 32 },

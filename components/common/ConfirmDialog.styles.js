@@ -1,7 +1,11 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  overlay: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24 },
+  overlay: {
+    ...require('react-native').StyleSheet.absoluteFillObject,
+    alignItems: 'center', justifyContent: 'center', padding: 24,
+    zIndex: 1000, elevation: 1000,
+  },
   backdrop: { ...require('react-native').StyleSheet.absoluteFillObject, backgroundColor: colors.backdrop },
   card: {
     width: '100%', maxWidth: 340,

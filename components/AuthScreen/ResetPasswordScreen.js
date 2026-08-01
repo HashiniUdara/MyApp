@@ -58,7 +58,7 @@ export default function ResetPasswordScreen({ accessToken, onDone }) {
             <TextInput
               style={styles.input}
               placeholder="••••••••"
-              placeholderTextColor={themeColor('mutedText')}
+              placeholderTextColor={themeColor('placeholder')}
               value={newPass}
               onChangeText={setNewPassState}
               secureTextEntry
@@ -68,7 +68,7 @@ export default function ResetPasswordScreen({ accessToken, onDone }) {
             <TextInput
               style={styles.input}
               placeholder="••••••••"
-              placeholderTextColor={themeColor('mutedText')}
+              placeholderTextColor={themeColor('placeholder')}
               value={confirm}
               onChangeText={setConfirm}
               secureTextEntry

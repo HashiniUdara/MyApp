@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Switch, View, Text, TouchableOpacity } from 'react-native';
+import { Switch, View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { useAuth } from '../../store/authStore/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import ConfirmDialog from '../common/ConfirmDialog';
@@ -48,7 +48,11 @@ export default function ProfileScreen({ setActiveTab }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentInner}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>{WORDINGS.profile.title}</Text>
 
       <View style={styles.avatarWrap}>
@@ -129,6 +133,6 @@ export default function ProfileScreen({ setActiveTab }) {
         onConfirm={handleLogout}
         onCancel={() => setConfirmSignOut(false)}
       />
-    </View>
+    </ScrollView>
   );
 }

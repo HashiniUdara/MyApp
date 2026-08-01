@@ -165,7 +165,7 @@ export default createThemedStyleSheet((colors) => ({
   // Screen layout helpers (used by DayView)
   screenWrapper: { flex: 1, position: "relative" },
   scrollArea: { flex: 1 },
-  scrollContent: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 24, alignItems: "left" },
+  scrollContent: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 24, alignItems: "flex-start" },
 
   // Floating Action Button
   fab: {

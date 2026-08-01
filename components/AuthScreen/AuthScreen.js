@@ -18,7 +18,7 @@ function PasswordInput({ value, onChangeText, placeholder, style }) {
       <TextInput
         style={[styles.input, styles.passwordInput, style]}
         placeholder={placeholder ?? '••••••••'}
-        placeholderTextColor={themeColor('mutedText')}
+        placeholderTextColor={themeColor('placeholder')}
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={!show}
@@ -147,7 +147,7 @@ export default function AuthScreen() {
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
-              placeholderTextColor={themeColor('mutedText')}
+              placeholderTextColor={themeColor('placeholder')}
               value={resetEmail}
               onChangeText={setResetEmail}
               autoCapitalize="none"
@@ -162,7 +162,7 @@ export default function AuthScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder={WORDINGS.auth.codePlaceholder}
-                  placeholderTextColor={themeColor('mutedText')}
+                  placeholderTextColor={themeColor('placeholder')}
                   value={resetCode}
                   onChangeText={setResetCode}
                   keyboardType="number-pad"
@@ -226,7 +226,7 @@ export default function AuthScreen() {
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
-            placeholderTextColor={themeColor('mutedText')}
+            placeholderTextColor={themeColor('placeholder')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"

@@ -106,7 +106,7 @@ export default function SetNewPasswordScreen({ recoveryPayload, onDone }) {
                   <TextInput
                     style={styles.input}
                     placeholder={WORDINGS.auth.newPasswordPlaceholder}
-                    placeholderTextColor={themeColor('mutedText')}
+                    placeholderTextColor={themeColor('placeholder')}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPass}
@@ -128,7 +128,7 @@ export default function SetNewPasswordScreen({ recoveryPayload, onDone }) {
                 <TextInput
                   style={styles.input}
                   placeholder={WORDINGS.auth.confirmNewPasswordPlaceholder}
-                  placeholderTextColor={themeColor('mutedText')}
+                  placeholderTextColor={themeColor('placeholder')}
                   value={confirm}
                   onChangeText={setConfirm}
                   secureTextEntry

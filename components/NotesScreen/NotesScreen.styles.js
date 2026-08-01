@@ -1,7 +1,7 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  container: { flex: 1, padding: 20 },
+  container: { flex: 1, padding: 20,paddingHorizontal: 24, paddingTop: 56, },
   title:     { color: colors.textPrimary, fontSize: 24, fontWeight: '800', marginBottom: 20 },
   empty:     { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 },
   emptyText: { color: colors.mutedText, fontSize: 14 },

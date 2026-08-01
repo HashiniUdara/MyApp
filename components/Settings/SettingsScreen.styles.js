@@ -1,7 +1,7 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  container: { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 40 },
+  container: { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 40 },
   title: { color: colors.textPrimary, fontSize: 24, fontWeight: '800', marginBottom: 6 },
   description: { color: colors.mutedText, fontSize: 13, marginBottom: 18 },
   card: { backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.surfaceAlt, padding: 14, marginBottom: 16 },

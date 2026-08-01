@@ -1,8 +1,8 @@
 import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
-  container: { flex: 1 },
-  inner: { padding: 20, paddingBottom: 120 },
+  container: { flex: 1, position: 'relative'},
+  inner: { padding: 20, paddingTop: 56, paddingBottom: 140 },
 
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 18 },
   title: { color: colors.textPrimary, fontSize: 24, fontWeight: '800' },

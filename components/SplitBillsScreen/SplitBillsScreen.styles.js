@@ -7,11 +7,9 @@ export default createThemedStyleSheet((colors) => ({
     backgroundColor: colors.background,
   },
   headerBar: {
-    paddingTop: 16,
-    paddingHorizontal: 16,
+    paddingTop: 56,
+    paddingHorizontal: 24,
     paddingBottom: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   pageTitle: {
     color: colors.textPrimary,
@@ -54,6 +52,7 @@ export default createThemedStyleSheet((colors) => ({
   },
   groupFilterSection: {
     marginBottom: 8,
+    paddingLeft: 10,
   },
   sectionTitle: {
     color: colors.textPrimary,

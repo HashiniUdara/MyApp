@@ -2,7 +2,7 @@ import { createThemedStyleSheet } from '../../config/theme';
 
 export default createThemedStyleSheet((colors) => ({
   container: { flex: 1 },
-  inner:     { paddingHorizontal: 20, paddingTop: 56, paddingBottom: 20 },
+  inner:     { paddingHorizontal: 24, paddingTop: 56, paddingBottom: 20 },
   title:     { color: colors.textPrimary, fontSize: 24, fontWeight: '800', marginBottom: 20 },
   empty:     { color: colors.mutedText, fontSize: 15, textAlign: 'center', marginTop: 40 },
   habitRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 14, padding: 16, marginBottom: 10, borderWidth: 1, borderColor: colors.surfaceAlt },

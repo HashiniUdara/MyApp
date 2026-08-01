@@ -67,12 +67,15 @@ export const SELF_SCROLLING_TABS = [
   'day',
   'calendar',
   'habits',
-    'budget',
+  'todos',
+  'budget',
   'savings',
   'settings',
   'reminders',
   'graph',
-  ];
+  'notes',
+  'profile',
+];
 
 export const SPLIT_BILL_TABS = [
   { id: 'expenses', labelKey: 'expensesTab' },

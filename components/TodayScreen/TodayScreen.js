@@ -60,57 +60,63 @@ export default function TodayScreen({ setActiveTab }) {
         <SummaryCard label="Income"  value={`LKR ${fmtLKR(totalIncome)}`}  color={themeColor('success')} icon="arrow-down-circle-outline" />
         <SummaryCard label="Expense" value={`LKR ${fmtLKR(totalExpense)}`} color={themeColor('danger')} icon="arrow-up-circle-outline" />
       </View>
-      <View style={[styles.balanceCard, { borderColor: balance >= 0 ? themeColor('success') : themeColor('danger') }]}>
-        <Text style={styles.balanceLabel}>Balance</Text>
-        <Text style={[styles.balanceValue, { color: balance >= 0 ? themeColor('success') : themeColor('danger') }]}>
-          {balance >= 0 ? '+' : ''}LKR {fmtLKR(balance)}
-        </Text>
-      </View>
+      <TouchableOpacity key={'day'} onPress={() => setActiveTab('day')}>
+        <View style={[styles.balanceCard, { borderColor: balance >= 0 ? themeColor('success') : themeColor('danger') }]}>
+          <Text style={styles.balanceLabel}>Balance</Text>
+          <Text style={[styles.balanceValue, { color: balance >= 0 ? themeColor('success') : themeColor('danger') }]}>
+            {balance >= 0 ? '+' : ''}LKR {fmtLKR(balance)}
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Todos summary */}
-      <Text style={styles.sectionTitle}>Todos</Text>
-      <View style={styles.progressCard}>
-        <View style={styles.progressTop}>
-          <Text style={styles.progressLabel}>
-            {todoCompleted} of {todoTotal} completed
-          </Text>
-          <Text style={styles.progressPct}>
-            {todoTotal > 0 ? Math.round((todoCompleted / todoTotal) * 100) : 0}%
-          </Text>
+      <TouchableOpacity key={'todos'} onPress={() => setActiveTab('todos')}>
+        <Text style={styles.sectionTitle}>Todos</Text>
+        <View style={styles.progressCard}>
+          <View style={styles.progressTop}>
+            <Text style={styles.progressLabel}>
+              {todoCompleted} of {todoTotal} completed
+            </Text>
+            <Text style={styles.progressPct}>
+              {todoTotal > 0 ? Math.round((todoCompleted / todoTotal) * 100) : 0}%
+            </Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, {
+              width: todoTotal > 0 ? `${(todoCompleted / todoTotal) * 100}%` : '0%',
+              backgroundColor: themeColor('accent'),
+            }]} />
+          </View>
         </View>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, {
-            width: todoTotal > 0 ? `${(todoCompleted / todoTotal) * 100}%` : '0%',
-            backgroundColor: themeColor('accent'),
-          }]} />
-        </View>
-      </View>
+      </TouchableOpacity>
 
       {/* Habits summary */}
-      <Text style={styles.sectionTitle}>Habits</Text>
-      <View style={styles.progressCard}>
-        <View style={styles.progressTop}>
-          <Text style={styles.progressLabel}>
-            {habitsDone} of {habitsTotal} done today
-          </Text>
-          <Text style={styles.progressPct}>{habitPct}%</Text>
-        </View>
-        <View style={styles.progressTrack}>
-          <View style={[styles.progressFill, {
-            width: `${habitPct}%`,
-            backgroundColor: themeColor('warning'),
-          }]} />
-        </View>
-        {habits.map(h => (
-          <View key={h.id} style={styles.habitRow}>
-            <View style={[styles.habitDot, { backgroundColor: isDone(h.id, today) ? h.color : themeColor('surfaceAlt') }]} />
-            <Text style={[styles.habitName, !isDone(h.id, today) && { color: themeColor('mutedText') }]}>
-              {h.emoji} {h.name}
+      <TouchableOpacity key={'habits'} onPress={() => setActiveTab('habits')}>
+        <Text style={styles.sectionTitle}>Habits</Text>
+        <View style={styles.progressCard}>
+          <View style={styles.progressTop}>
+            <Text style={styles.progressLabel}>
+              {habitsDone} of {habitsTotal} done today
             </Text>
-            {isDone(h.id, today) && <Ionicons name="checkmark" size={14} color={h.color} />}
+            <Text style={styles.progressPct}>{habitPct}%</Text>
           </View>
-        ))}
-      </View>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, {
+              width: `${habitPct}%`,
+              backgroundColor: themeColor('warning'),
+            }]} />
+          </View>
+          {habits.map(h => (
+            <View key={h.id} style={styles.habitRow}>
+              <View style={[styles.habitDot, { backgroundColor: isDone(h.id, today) ? h.color : themeColor('surfaceAlt') }]} />
+              <Text style={[styles.habitName, !isDone(h.id, today) && { color: themeColor('mutedText') }]}>
+                {h.emoji} {h.name}
+              </Text>
+              {isDone(h.id, today) && <Ionicons name="checkmark" size={14} color={h.color} />}
+            </View>
+          ))}
+        </View>
+      </TouchableOpacity>
 
       {/* Quick links */}
       <Text style={styles.sectionTitle}>Quick Access</Text>

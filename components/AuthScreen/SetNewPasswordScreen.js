@@ -11,39 +11,50 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { setNewPassword, verifyRecoveryToken } from '../../store/supabaseClient';
 import { themeColor } from '../../config/theme';
+import { WORDINGS } from '../../config/wordings';
 
-export default function SetNewPasswordScreen({ tokenHash, onDone }) {
+export default function SetNewPasswordScreen({ recoveryPayload, onDone }) {
   const [password,  setPassword]  = useState('');
   const [confirm,   setConfirm]   = useState('');
   const [showPass,  setShowPass]  = useState(false);
   const [loading,   setLoading]   = useState(false);
   const [verifying, setVerifying] = useState(true);
-  const [accessToken, setAccessToken] = useState(null);
+  const [accessToken, setAccessToken] = useState(recoveryPayload?.accessToken ?? null);
   const [error,     setError]     = useState('');
   const [success,   setSuccess]   = useState(false);
 
-  // Exchange the token hash for a session access token
+  // Exchange the token hash for a session access token if needed
   useEffect(() => {
-    if (!tokenHash) { setError('Invalid reset link.'); setVerifying(false); return; }
+    const tokenHash = recoveryPayload?.tokenHash;
+    if (accessToken) {
+      setVerifying(false);
+      return;
+    }
+    if (!tokenHash) {
+      setError('Invalid reset link.');
+      setVerifying(false);
+      return;
+    }
+
     verifyRecoveryToken(tokenHash)
       .then(data => setAccessToken(data.access_token))
-      .catch(e  => setError(e.message ?? 'This reset link is invalid or has expired.'))
+      .catch(e  => setError(e.message ?? WORDINGS.auth.invalidResetCode))
       .finally(() => setVerifying(false));
-  }, [tokenHash]);
+  }, [accessToken, recoveryPayload]);
 
   const handleSubmit = async () => {
     setError('');
-    if (!password.trim())          { setError('Please enter a new password.'); return; }
-    if (password.length < 6)       { setError('Password must be at least 6 characters.'); return; }
-    if (password !== confirm)      { setError('Passwords do not match.'); return; }
-    if (!accessToken)              { setError('Session expired. Please request a new reset link.'); return; }
+    if (!password.trim())          { setError(WORDINGS.auth.pleaseEnterNewPassword); return; }
+    if (password.length < 6)       { setError(WORDINGS.auth.passwordTooShort); return; }
+    if (password !== confirm)      { setError(WORDINGS.auth.passwordsDoNotMatch); return; }
+    if (!accessToken)              { setError(WORDINGS.auth.sessionExpired); return; }
 
     setLoading(true);
     try {
       await setNewPassword(accessToken, password);
       setSuccess(true);
     } catch (e) {
-      setError(e.message ?? 'Failed to update password. Please try again.');
+      setError(e.message ?? WORDINGS.auth.failedToUpdatePassword);
     } finally {
       setLoading(false);
     }
@@ -53,7 +64,7 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color={themeColor('primary')} />
-        <Text style={styles.verifyText}>Verifying reset link…</Text>
+        <Text style={styles.verifyText}>{WORDINGS.auth.verifyingResetLink}</Text>
       </View>
     );
   }
@@ -64,20 +75,20 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.card}>
-        <Text style={styles.title}>Set New Password</Text>
+        <Text style={styles.title}>{WORDINGS.auth.setNewPassword}</Text>
 
         {success ? (
           <View>
             <View style={styles.successBox}>
               <Text style={styles.successText}>
-                ✅ Password updated successfully!
+                {WORDINGS.auth.resetSuccess}
               </Text>
             </View>
             <Text style={styles.successSub}>
-              Your password has been changed. You can now sign in with your new password.
+              {WORDINGS.auth.passwordChanged}
             </Text>
             <TouchableOpacity style={styles.btn} onPress={onDone}>
-              <Text style={styles.btnText}>Go to Sign In</Text>
+              <Text style={styles.btnText}>{WORDINGS.auth.goToSignIn}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -90,11 +101,11 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
 
             {!error && (
               <>
-                <Text style={styles.label}>New Password</Text>
+                <Text style={styles.label}>{WORDINGS.auth.newPasswordLabel}</Text>
                 <View style={styles.inputWrap}>
                   <TextInput
                     style={styles.input}
-                    placeholder="At least 6 characters"
+                    placeholder={WORDINGS.auth.newPasswordPlaceholder}
                     placeholderTextColor={themeColor('mutedText')}
                     value={password}
                     onChangeText={setPassword}
@@ -113,10 +124,10 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
                   </TouchableOpacity>
                 </View>
 
-                <Text style={styles.label}>Confirm Password</Text>
+                <Text style={styles.label}>{WORDINGS.auth.confirmNewPasswordLabel}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Repeat your password"
+                  placeholder={WORDINGS.auth.confirmNewPasswordPlaceholder}
                   placeholderTextColor={themeColor('mutedText')}
                   value={confirm}
                   onChangeText={setConfirm}
@@ -130,7 +141,7 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
                 >
                   {loading
                     ? <ActivityIndicator color="#fff" />
-                    : <Text style={styles.btnText}>Update Password</Text>
+                    : <Text style={styles.btnText}>{WORDINGS.auth.updatePassword}</Text>
                   }
                 </TouchableOpacity>
               </>
@@ -140,7 +151,7 @@ export default function SetNewPasswordScreen({ tokenHash, onDone }) {
             {!!error && (
               <TouchableOpacity style={styles.backLink} onPress={onDone}>
                 <Ionicons name="arrow-back" size={16} color={themeColor('primary')} />
-                <Text style={styles.backText}>Back to Sign In</Text>
+                <Text style={styles.backText}>{WORDINGS.auth.backToSignIn}</Text>
               </TouchableOpacity>
             )}
           </>

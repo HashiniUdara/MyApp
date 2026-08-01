@@ -14,15 +14,20 @@ import { Platform } from 'react-native';
 function parseTokensFromHash(hash) {
   if (!hash) return null;
   const clean = hash.startsWith('#') ? hash.slice(1) : hash;
-  if (!clean.includes('access_token') || !clean.includes('type=recovery')) return null;
-
   const params = new URLSearchParams(clean);
+  const type = params.get('type');
+  if (type !== 'recovery') return null;
+
   const accessToken = params.get('access_token');
   const refreshToken = params.get('refresh_token');
-  const type = params.get('type');
-  if (!accessToken || type !== 'recovery') return null;
+  const tokenHash = params.get('token_hash');
+  if (!accessToken && !tokenHash) return null;
 
-  return { accessToken, refreshToken };
+  return {
+    ...(accessToken ? { accessToken } : {}),
+    ...(refreshToken ? { refreshToken } : {}),
+    ...(tokenHash ? { tokenHash } : {}),
+  };
 }
 
 // Web: read directly from window.location.hash.

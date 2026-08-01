@@ -5,6 +5,7 @@ import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
 import { BOTTOM_TABS, MORE_MENU_ITEMS, SELF_SCROLLING_TABS } from './config/appConstants';
 import { WORDINGS } from './config/wordings';
+import { extractRecoveryTokensFromWebUrl, extractRecoveryTokensFromUrl, clearWebRecoveryHash } from './utils/recoveryLink';
 
 import { AuthProvider, useAuth }   from './store/authStore/AuthContext';
 import { useAppStore }              from './store/useAppStore';
@@ -171,38 +172,16 @@ function MainApp() {
 function Root() {
   const { user, loading } = useAuth();
   const { colors } = useTheme();
-  const [resetToken, setResetToken] = useState(null);
+  const [resetPayload, setResetPayload] = useState(null);
 
   // Listen for password reset redirects — works on both web and native
   useEffect(() => {
-    const parseToken = (url) => {
-      if (!url) return null;
-      try {
-        // Fragment takes priority: #token_hash=xxx&type=recovery
-        const fragment = url.includes('#') ? url.split('#')[1] : url.split('?')[1] ?? '';
-        const params   = Object.fromEntries(
-          fragment.split('&').filter(Boolean).map(p => {
-            const idx = p.indexOf('=');
-            return [p.slice(0, idx), decodeURIComponent(p.slice(idx + 1))];
-          })
-        );
-        if (params.token_hash && params.type === 'recovery') return params.token_hash;
-        // Some Supabase versions use `access_token` directly in the fragment
-        if (params.access_token && params.type === 'recovery') return params.access_token;
-      } catch (_) {}
-      return null;
-    };
-
     // ── Web: check window.location.hash immediately ───────────────
     if (typeof window !== 'undefined' && window.location) {
-      const fullUrl = window.location.href;
-      const token   = parseToken(fullUrl);
-      if (token) {
-        setResetToken(token);
-        // Clean the hash from the URL bar so refreshing doesn't re-trigger
-        if (window.history?.replaceState) {
-          window.history.replaceState(null, '', window.location.pathname);
-        }
+      const payload = extractRecoveryTokensFromWebUrl();
+      if (payload) {
+        setResetPayload(payload);
+        clearWebRecoveryHash();
         return; // Don't set up native listener on web
       }
     }
@@ -210,8 +189,8 @@ function Root() {
     // ── Native: listen for deep links ─────────────────────────────
     let sub;
     const handleUrl = (event) => {
-      const token = parseToken(event?.url ?? event);
-      if (token) setResetToken(token);
+      const payload = extractRecoveryTokensFromUrl(event?.url ?? event);
+      if (payload) setResetPayload(payload);
     };
 
     import('expo-linking').then(Linking => {
@@ -223,11 +202,11 @@ function Root() {
   }, []);
 
   // Show reset password screen if deep link token present
-  if (resetToken) {
+  if (resetPayload) {
     return (
       <SetNewPasswordScreen
-        tokenHash={resetToken}
-        onDone={() => setResetToken(null)}
+        recoveryPayload={resetPayload}
+        onDone={() => setResetPayload(null)}
       />
     );
   }

@@ -2,7 +2,7 @@
   "name": "myapp",
   "version": "1.0.0",
   "engines": {
-    "node": ">=26.0.0"
+    "node": ">=24.0.0"
   },
   "scripts": {
     "start": "expo start --dev-client",

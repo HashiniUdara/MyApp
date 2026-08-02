@@ -20,7 +20,8 @@ npx expo install expo-linking
 
 
 <!-- build apk and test-->
-npm install -g eas-cli@3.13.3
+npm install -g eas-cli
+npm install
 eas login
 eas build:configure
     eas.json <- modify according to your need

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
+import TabPager from './components/common/TabPager';
 import { ThemeProvider, useTheme, createThemedStyleSheet } from './config/theme';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';
@@ -38,13 +39,19 @@ function MainApp() {
   const store = useAppStore(user.id);
   const { colors, isDark } = useTheme();
 
+  // Only the tabs shown directly on the bottom bar (excluding "more", which
+  // just toggles the overlay menu below) are swipeable between each other.
+  const SWIPEABLE_TABS = BOTTOM_TABS.filter(t => t.id !== 'more').map(t => t.id);
+  const swipeIndex = SWIPEABLE_TABS.indexOf(activeTab);
+  const isSwipeableTab = swipeIndex !== -1;
+
   const navigate = (tab) => {
     setShowMore(false);
     setActiveTab(tab);
   };
 
-  const renderScreen = () => {
-    switch (activeTab) {
+  const renderTab = (tabId) => {
+    switch (tabId) {
       case 'today':
         return <TodayScreen setActiveTab={navigate} />;
       case 'todos':
@@ -101,19 +108,38 @@ function MainApp() {
     }
   };
 
-  const selfScrolling = SELF_SCROLLING_TABS.includes(activeTab);
+  // Wraps a tab's content the same way it always was: screens in
+  // SELF_SCROLLING_TABS manage their own ScrollView, everything else gets
+  // wrapped in one here.
+  const wrapTab = (tabId, node) => (
+    SELF_SCROLLING_TABS.includes(tabId)
+      ? <View style={styles.content}>{node}</View>
+      : <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>{node}</ScrollView>
+  );
+
 
   return (
     <View style={styles.container}>
       <ExpoStatusBar style={isDark ? "light" : "dark"} />
 
       {/* Content area */}
-      {selfScrolling ? (
-        <View style={styles.content}>{renderScreen()}</View>
+      {isSwipeableTab ? (
+        <TabPager
+          style={styles.content}
+          activeIndex={swipeIndex}
+          onIndexChange={(index) => {
+            const tab = SWIPEABLE_TABS[index];
+            if (tab) navigate(tab);
+          }}
+        >
+          {SWIPEABLE_TABS.map((tabId) => (
+            <View key={tabId} style={{ flex: 1 }}>
+              {wrapTab(tabId, renderTab(tabId))}
+            </View>
+          ))}
+        </TabPager>
       ) : (
-        <ScrollView style={styles.content} contentContainerStyle={styles.contentInner}>
-          {renderScreen()}
-        </ScrollView>
+        wrapTab(activeTab, renderTab(activeTab))
       )}
 
       {/* More overlay menu */}

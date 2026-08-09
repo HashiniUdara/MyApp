@@ -98,7 +98,7 @@ export default function AuthScreen() {
     try {
       await requestPasswordReset(resetEmail.trim());
       setResetStep('verify');
-      setSuccess('Reset link sent! Check your email and click the link. Then come back and enter the code below.');
+      setSuccess('Verification code sent, Check your email and enter the code below.');
     } catch (e) { setError(e.message); }
     finally     { setLoading(false); }
   };

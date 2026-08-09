@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
-import TabPager from './components/common/TabPager';
+import TabPager from './components/common/Tabpager';
 import { ThemeProvider, useTheme, createThemedStyleSheet } from './config/theme';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { Ionicons } from '@expo/vector-icons';

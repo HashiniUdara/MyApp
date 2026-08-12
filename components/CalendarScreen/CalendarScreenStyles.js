@@ -58,7 +58,7 @@ export default createThemedStyleSheet((colors) => ({
     flex: 1,                    // each of the 7 cells shares the row equally
     minHeight: 52,
     marginRight: GAP,
-    backgroundColor: colors.surfaceSoft,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 4,
   },
@@ -67,7 +67,7 @@ export default createThemedStyleSheet((colors) => ({
   // (applied inline in the component with a style override)
   cellLast: { marginRight: 0 },
 
-  cellFaded:    { backgroundColor: colors.surfaceSoft },
+  cellFaded:    { backgroundColor: colors.surface },
   cellToday:    { backgroundColor: colors.primarySoft, borderWidth: 1, borderColor: colors.primary },
   cellSelected: { backgroundColor: colors.operatorBg },
 
@@ -88,7 +88,7 @@ export default createThemedStyleSheet((colors) => ({
     marginTop: 14, gap: 8,
   },
   pill: {
-    flex: 1, backgroundColor: colors.surfaceSoft, borderRadius: 12,
+    flex: 1, backgroundColor: colors.surface, borderRadius: 12,
     paddingVertical: 12, paddingHorizontal: 8, alignItems: 'center',
   },
   pillLabel: { color: colors.mutedText, fontSize: 11, fontWeight: '600', marginBottom: 4 },

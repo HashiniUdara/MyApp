@@ -12,7 +12,6 @@ export default createThemedStyleSheet((colors) => ({
   habitName:   { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
   habitSub:    { color: colors.mutedText, fontSize: 12, marginTop: 3 },
   rowActions:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  // actionBtn:   { width: 32, height: 32, borderRadius: 16, backgroundColor: colors.surfaceSoft, alignItems: 'center', justifyContent: 'center' },
   actionBtn: {
     width: 30, height: 30, borderRadius: 9,
     alignItems: 'center', justifyContent: 'center',

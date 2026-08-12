@@ -4,10 +4,7 @@ import { useHabits } from '../../store/habitStore/HabitContext';
 import styles from './HabitDetailScreen.styles';
 import { themeColor } from '../../config/theme';
 import { WORDINGS } from '../../config/wordings';
-
-
-const WEEKDAYS    = ['Mo','Tu','We','Th','Fr','Sa','Su'];
-const MONTHS      = ['January','February','March','April','May','June', 'July','August','September','October','November','December'];
+import { MONTHS, WEEKDAYS_MON } from '../../config/appConstants';
 
 const pad = (n) => String(n).padStart(2, '0');
 
@@ -123,7 +120,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
 
         {/* Weekday header */}
         <View style={styles.weekRow}>
-          {WEEKDAYS.map(d => (
+          {WEEKDAYS_MON.map(d => (
             <View key={d} style={styles.weekCell}>
               <Text style={styles.weekLabel}>{d}</Text>
             </View>

@@ -92,4 +92,4 @@ export const MONTHS = ['January','February','March','April','May','June','July',
 export const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 export const WEEKDAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 export const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-
+export const WEEKDAYS_MON   = ['Mo','Tu','We','Th','Fr','Sa','Su'];

@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView, Modal } from 'react-native';
 import styles from './CalendarScreenStyles';
 import CalendarDayScreen from './CalendarDayScreen';
 import { themeColor } from '../../config/theme';
-import { MONTHS, WEEKDAYS_SHORT } from '../../config/appConstants';
+import { MONTHS, WEEKDAYS_MON } from '../../config/appConstants';
 import { Ionicons } from '@expo/vector-icons';
 
 function buildGrid(year, month) {
@@ -115,7 +115,7 @@ export default function CalendarScreen({ transactions, onAdd, onUpdate, onRemove
         </View>
 
         <View style={styles.weekRow}>
-          {WEEKDAYS_SHORT.map(d => <View key={d} style={styles.weekCell}><Text style={styles.weekLabel}>{d}</Text></View>)}
+          {WEEKDAYS_MON.map(d => <View key={d} style={styles.weekCell}><Text style={styles.weekLabel}>{d}</Text></View>)}
         </View>
 
         <View style={styles.grid}>

@@ -7,6 +7,8 @@ import {
   setAuthToken, clearAuthToken,
   SUPABASE_URL, SUPABASE_ANON,
 } from '../supabaseClient';
+import { clearUserCache, clearQueue } from '../../utils/offlineStorage';
+import { isOnline } from '../../utils/networkStatus';
 
 const AuthContext  = createContext(null);
 const SESSION_KEY  = STORAGE_KEYS.session;
@@ -45,7 +47,21 @@ export function AuthProvider({ children }) {
         const session = await loadSession();
         if (!session?.refreshToken) return; // no saved session
 
-        // Refresh the access token (they expire after 1 hour in Supabase)
+        // If the device is offline, skip the refresh attempt entirely —
+        // restore the user from the cached session so they stay logged in.
+        // The access token will be refreshed the next time connectivity returns.
+        if (!(await isOnline())) {
+          const u = session.user;
+          // Re-use the stored access token even if it may be expired.
+          // All API calls are served from local cache offline anyway, so
+          // the token is only needed when the device reconnects, at which
+          // point the next online session-start will refresh it.
+          setAuthToken(session.accessToken ?? '');
+          setUser(u);
+          return;
+        }
+
+        // Online — attempt a proper token refresh
         const refreshed = await doRefresh(session.refreshToken);
         const u = { id: refreshed.user.id, email: refreshed.user.email };
         setAuthToken(refreshed.access_token);
@@ -56,8 +72,26 @@ export function AuthProvider({ children }) {
           refreshToken: refreshed.refresh_token,
           user: u,
         });
-      } catch (_) {
-        // Token expired or invalid — clear and show login screen
+      } catch (err) {
+        // Only clear the session for genuine auth failures (HTTP errors,
+        // invalid/expired token).  A network-level failure (TypeError:
+        // network request failed) means we're offline — keep the session.
+        const isNetworkError = err instanceof TypeError ||
+          (err.message ?? '').toLowerCase().includes('network');
+
+        if (isNetworkError) {
+          // Offline during startup — try to restore from cache without refreshing
+          try {
+            const session = await loadSession();
+            if (session?.user) {
+              setAuthToken(session.accessToken ?? '');
+              setUser(session.user);
+              return;
+            }
+          } catch { /* nothing stored — fall through to login screen */ }
+        }
+
+        // Real auth failure — token invalid or expired
         await clearSession();
         clearAuthToken();
       } finally {
@@ -68,6 +102,10 @@ export function AuthProvider({ children }) {
 
   // ── Sign in ──────────────────────────────────────────────────
   const login = useCallback(async (email, password) => {
+    // Guard: can't sign in for the first time without connectivity
+    if (!(await isOnline())) {
+      throw new Error(WORDINGS.errors.offlineLogin ?? 'You are offline. Please connect to the internet to sign in.');
+    }
     const data = await signIn(email, password);
     if (data.user) {
       const u = { id: data.user.id, email: data.user.email };
@@ -88,13 +126,40 @@ export function AuthProvider({ children }) {
 
   // ── Sign out ─────────────────────────────────────────────────
   const logout = useCallback(async () => {
+    const uid = user?.id;
     await signOut();
     await clearSession();
+    if (uid) {
+      await clearUserCache(uid);
+      await clearQueue(uid);
+    }
     setUser(null);
-  }, []);
+  }, [user]);
+
+  // ── Refresh token when app comes back online ──────────────────
+  // If the user was restored from cache (offline startup), their access
+  // token may be stale.  Re-run a proper refresh once connectivity returns.
+  const refreshSessionIfNeeded = useCallback(async () => {
+    if (!user) return;
+    try {
+      const session = await loadSession();
+      if (!session?.refreshToken) return;
+      const refreshed = await doRefresh(session.refreshToken);
+      const u = { id: refreshed.user.id, email: refreshed.user.email };
+      setAuthToken(refreshed.access_token);
+      setUser(u);
+      await saveSession({
+        accessToken:  refreshed.access_token,
+        refreshToken: refreshed.refresh_token,
+        user: u,
+      });
+    } catch {
+      // If this fails it just means the token is still valid or we're still offline
+    }
+  }, [user]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshSessionIfNeeded }}>
       {children}
     </AuthContext.Provider>
   );

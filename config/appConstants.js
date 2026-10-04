@@ -1,5 +1,11 @@
 export const STORAGE_KEYS = {
   session: 'myapp_session',
+  // Offline-first cache and sync queue keys are dynamic:
+  //   cache:   "cache:{entity}:{userId}"
+  //   queue:   "syncQueue:{userId}"
+  // These prefixes are used by utils/offlineStorage.js
+  cachePrefix: 'cache',
+  syncQueuePrefix: 'syncQueue',
 };
 
 export const COLORS = {

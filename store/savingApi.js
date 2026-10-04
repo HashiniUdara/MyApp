@@ -1,60 +1,83 @@
+/**
+ * savingApi.js  — offline-first
+ */
+
 import { dbQuery } from './supabaseClient';
+import { readCache, writeCache, patchCache, enqueue } from '../utils/offlineStorage';
+import { isOnline } from '../utils/networkStatus';
+import { generateUUID } from '../utils/uuid';
+
+const ENTITY     = 'savings';
+const ENTITY_CAT = 'saving_categories';
+
+// ─── Savings ──────────────────────────────────────────────────────
 
 export async function fetchSavings(userId) {
-  return dbQuery('savings', {
-    filters: [`user_id=eq.${userId}`],
-    order: 'date.desc',
-  });
+  const cached = await readCache(ENTITY, userId);
+
+  if (await isOnline()) {
+    try {
+      const data = await dbQuery(ENTITY, {
+        filters: [`user_id=eq.${userId}`],
+        order: 'date.desc',
+      });
+      const fresh = data ?? [];
+      await writeCache(ENTITY, userId, fresh);
+      return fresh;
+    } catch { /* fall through */ }
+  }
+
+  return cached;
 }
 
 export async function createSaving(userId, item) {
-  return dbQuery('savings', {
-    method: 'POST',
-    body: { ...item, user_id: userId },
-    single: true,
-  });
+  const record = { ...item, id: generateUUID(), user_id: userId, created_at: new Date().toISOString() };
+
+  await patchCache(ENTITY, userId, (prev) => [record, ...prev]);
+
+  if (await isOnline()) {
+    try {
+      const saved = await dbQuery(ENTITY, { method: 'POST', body: record, single: true });
+      await patchCache(ENTITY, userId, (prev) => prev.map((s) => (s.id === record.id ? saved : s)));
+      return saved;
+    } catch { /* fall through */ }
+  }
+
+  await enqueue(userId, { id: generateUUID(), entity: ENTITY, op: 'create', payload: record, userId });
+  return record;
 }
 
 export async function updateSaving(id, item) {
-  return dbQuery('savings', {
-    method: 'PATCH',
-    body: item,
-    filters: [`id=eq.${id}`],
-    single: true,
-  });
+  const userId = item.user_id ?? '_';
+  await patchCache(ENTITY, userId, (prev) =>
+    prev.map((s) => (s.id === id ? { ...s, ...item } : s)),
+  );
+
+  if (await isOnline()) {
+    try {
+      return await dbQuery(ENTITY, { method: 'PATCH', body: item, filters: [`id=eq.${id}`], single: true });
+    } catch { /* fall through */ }
+  }
+
+  await enqueue(userId, { id: generateUUID(), entity: ENTITY, op: 'update', recordId: id, payload: item, userId });
+  return { id, ...item };
 }
 
-export async function deleteSaving(id) {
-  return dbQuery('savings', {
-    method: 'DELETE',
-    filters: [`id=eq.${id}`],
-  });
+export async function deleteSaving(id, userId) {
+  await patchCache(ENTITY, userId, (prev) => prev.filter((s) => s.id !== id));
+
+  if (await isOnline()) {
+    try {
+      await dbQuery(ENTITY, { method: 'DELETE', filters: [`id=eq.${id}`] });
+      return;
+    } catch { /* fall through */ }
+  }
+
+  await enqueue(userId, { id: generateUUID(), entity: ENTITY, op: 'delete', recordId: id, userId });
 }
 
-export async function fetchSavingCategories() {
-  return dbQuery('saving_categories', { order: 'label.asc' });
-}
+// ─── Saving categories (legacy path used by SavingsScreen) ────────
+// These delegate to categoryApi to avoid duplicating cache logic.
 
-export async function createSavingCategory(label) {
-  return dbQuery('saving_categories', {
-    method: 'POST',
-    body: { label: label.trim() },
-    single: true,
-  });
-}
-
-export async function updateSavingCategory(id, patch) {
-  return dbQuery('saving_categories', {
-    method: 'PATCH',
-    body: patch,
-    filters: [`id=eq.${id}`],
-    single: true,
-  });
-}
-
-export async function deleteSavingCategory(id) {
-  return dbQuery('saving_categories', {
-    method: 'DELETE',
-    filters: [`id=eq.${id}`],
-  });
-}
+export { fetchSavingCategories, createSavingCategory, updateSavingCategory, deleteSavingCategory }
+  from './categoryApi';

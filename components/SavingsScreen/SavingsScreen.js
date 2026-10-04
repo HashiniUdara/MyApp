@@ -170,7 +170,7 @@ export default function SavingsScreen({ userId }) {
       setError(null);
       const payload = { category, amount: value, date, note: note.trim() };
       if (editing?.id) {
-        const updated = await updateSaving(editing.id, payload);
+        const updated = await updateSaving(editing.id, { ...payload, user_id: userId });
         setItems((prev) =>
           prev.map((row) => (row.id === editing.id ? updated : row)),
         );
@@ -189,7 +189,7 @@ export default function SavingsScreen({ userId }) {
   const confirmDelete = async () => {
     if (!pendingDelete) return;
     try {
-      await deleteSaving(pendingDelete.id);
+      await deleteSaving(pendingDelete.id, userId);
       setItems((prev) => prev.filter((row) => row.id !== pendingDelete.id));
     } catch (e) {
       setError(e.message);

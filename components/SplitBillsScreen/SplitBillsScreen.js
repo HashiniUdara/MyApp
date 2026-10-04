@@ -373,7 +373,7 @@ export default function SplitBillsScreen() {
 
     try {
       if (editingExpense) {
-        await updateSplitBillExpense(editingExpense.id, payload);
+        await updateSplitBillExpense(editingExpense.id, payload, user.id);
       } else {
         await createSplitBillExpense(user.id, payload);
       }
@@ -392,7 +392,7 @@ export default function SplitBillsScreen() {
     const exists = allPeople.some((person) => person.name.toLowerCase() === cleanedName.toLowerCase());
     if (editingPerson) {
       try {
-        await updateSplitBillPerson(editingPerson.id, { name: cleanedName });
+        await updateSplitBillPerson(editingPerson.id, { name: cleanedName }, user.id);
         await loadData();
         setShowPeopleModal(false);
         setEditingPerson(null);
@@ -427,7 +427,7 @@ export default function SplitBillsScreen() {
   const confirmDeleteExpense = async () => {
     if (!user?.id || !pendingDeleteExpense) return;
     try {
-      await deleteSplitBillExpense(pendingDeleteExpense.id);
+      await deleteSplitBillExpense(pendingDeleteExpense.id, user.id);
       await loadData();
     } catch (error) {
       console.warn('Delete expense error', error);
@@ -439,7 +439,7 @@ export default function SplitBillsScreen() {
   const confirmDeletePerson = async () => {
     if (!user?.id || !pendingDeletePerson) return;
     try {
-      await deleteSplitBillPerson(pendingDeletePerson.id);
+      await deleteSplitBillPerson(pendingDeletePerson.id, user.id);
       await loadData();
     } catch (error) {
       console.warn('Delete person error', error);
@@ -473,7 +473,7 @@ export default function SplitBillsScreen() {
 
     try {
       if (editingGroup) {
-        await updateSplitBillGroup(editingGroup.id, payload);
+        await updateSplitBillGroup(editingGroup.id, payload, user.id);
       } else {
         await createSplitBillGroup(user.id, payload);
       }
@@ -494,7 +494,7 @@ export default function SplitBillsScreen() {
   const confirmDeleteGroup = async () => {
     if (!user?.id || !pendingDeleteGroup) return;
     try {
-      await deleteSplitBillGroup(pendingDeleteGroup.id);
+      await deleteSplitBillGroup(pendingDeleteGroup.id, user.id);
       await loadData();
     } catch (error) {
       console.warn('Delete group error', error);

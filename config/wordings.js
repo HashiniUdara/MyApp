@@ -179,6 +179,7 @@ export const WORDINGS = {
   errors: {
     auth: 'Auth error',
     sessionExpired: 'Session expired',
+    offlineLogin: 'You are offline. Please connect to the internet to sign in.',
     invalidResetCode: 'That code is invalid or has expired. Please request a new one.',
     addCategory: 'Could not add category',
     updateCategory: 'Could not update category',

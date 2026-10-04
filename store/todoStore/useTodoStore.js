@@ -33,17 +33,17 @@ export function useTodoStore(userId) {
 
   const updateTodoItem = useCallback(async (id, patch) => {
     try {
-      const saved = await updateTodo(id, patch);
-      setTodos(prev => prev.map(t => t.id === id ? saved : t));
+      const saved = await updateTodo(id, { ...patch, user_id: userId });
+      setTodos(prev => prev.map(t => t.id === id ? { ...t, ...saved } : t));
     } catch (e) { setError(e.message); }
-  }, []);
+  }, [userId]);
 
   const removeTodo = useCallback(async (id) => {
     try {
-      await deleteTodo(id);
+      await deleteTodo(id, userId);
       setTodos(prev => prev.filter(t => t.id !== id));
     } catch (e) { setError(e.message); }
-  }, []);
+  }, [userId]);
 
   const toggleComplete = useCallback(async (id) => {
     const todo = todos.find(t => t.id === id);

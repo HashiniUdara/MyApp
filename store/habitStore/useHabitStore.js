@@ -42,11 +42,11 @@ export function useHabitStore(userId) {
 
   const removeHabit = useCallback(async (id) => {
     try {
-      await deleteHabit(id);
+      await deleteHabit(id, userId);
       setHabits(prev => prev.filter(h => h.id !== id));
       setCompletions(prev => { const c = { ...prev }; delete c[id]; return c; });
     } catch (e) { setError(e.message); }
-  }, []);
+  }, [userId]);
 
   const toggleDay = useCallback(async (habitId, dateStr) => {
     const done = !!(completions[habitId]?.[dateStr]);
@@ -56,8 +56,8 @@ export function useHabitStore(userId) {
       return { ...prev, [habitId]: map };
     });
     try {
-      if (done) await unmarkCompletion(habitId, dateStr);
-      else      await markCompletion(habitId, dateStr);
+      if (done) await unmarkCompletion(habitId, dateStr, userId);
+      else      await markCompletion(habitId, dateStr, userId);
     } catch (e) {
       setCompletions(prev => {
         const map = { ...(prev[habitId] ?? {}) };
@@ -66,7 +66,7 @@ export function useHabitStore(userId) {
       });
       setError(e.message);
     }
-  }, [completions]);
+  }, [completions, userId]);
 
   const isDone = useCallback((habitId, dateStr) =>
     !!(completions[habitId]?.[dateStr]), [completions]);

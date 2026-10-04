@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, ActivityIndicator, SafeAreaView, AppState } from 'react-native';
 import TabPager from './components/common/Tabpager';
 import { ThemeProvider, useTheme, createThemedStyleSheet } from './config/theme';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
@@ -14,6 +14,8 @@ import { ReminderProvider }         from './store/reminderStore/ReminderContext'
 import { HabitProvider }            from './store/habitStore/HabitContext';
 import { TodoProvider }             from './store/todoStore/TodoContext';
 import { CategoryProvider }         from './store/categoryStore/CategoryContext';
+import { useNetwork }               from './utils/networkStatus';
+import SyncStatusBanner             from './components/common/SyncStatusBanner';
 
 import AuthScreen           from './components/AuthScreen/AuthScreen';
 import SetNewPasswordScreen from './components/AuthScreen/SetNewPasswordScreen';
@@ -33,11 +35,23 @@ import FinanceGraphScreen from './components/FinanceGraphScreen/FinanceGraphScre
 import SplitBillsScreen from './components/SplitBillsScreen/SplitBillsScreen';
 
 function MainApp() {
-  const { user } = useAuth();
+  const { user, refreshSessionIfNeeded } = useAuth();
   const [activeTab, setActiveTab] = useState('today');
   const [showMore, setShowMore]   = useState(false);
   const store = useAppStore(user.id);
   const { colors, isDark } = useTheme();
+  const { online } = useNetwork();
+
+  // Re-run sync + token refresh whenever the app comes back to the foreground
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        refreshSessionIfNeeded(); // refresh stale access token if we were offline
+        store.sync();
+      }
+    });
+    return () => sub.remove();
+  }, [store.sync, refreshSessionIfNeeded]);
 
   // Only the tabs shown directly on the bottom bar (excluding "more", which
   // just toggles the overlay menu below) are swipeable between each other.
@@ -121,6 +135,13 @@ function MainApp() {
   return (
     <View style={styles.container}>
       <ExpoStatusBar style={isDark ? "light" : "dark"} />
+
+      {/* Offline / sync status banner */}
+      <SyncStatusBanner
+        online={online}
+        syncing={store.syncing}
+        pendingOps={store.pendingOps}
+      />
 
       {/* Content area */}
       {isSwipeableTab ? (

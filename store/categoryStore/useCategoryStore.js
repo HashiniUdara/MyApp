@@ -68,8 +68,8 @@ export function useCategoryStore(userId) {
   }, [load]);
 
   const removeTransactionCategory = useCallback(async (id) => {
-    await deleteTransactionCategory(id); await load();
-  }, [load]);
+    await deleteTransactionCategory(id, userId); await load();
+  }, [userId, load]);
 
   const addTransactionSubcategory = useCallback(async (row, subcategory) => {
     const next = Array.from(new Set([...(row.subcategories ?? []), subcategory.trim()].filter(Boolean)));
@@ -101,8 +101,8 @@ export function useCategoryStore(userId) {
   }, [load]);
 
   const removeTodoCategory = useCallback(async (id) => {
-    await deleteTodoCategory(id); await load();
-  }, [load]);
+    await deleteTodoCategory(id, userId); await load();
+  }, [userId, load]);
 
   const updateTodoCategoryStyle = useCallback(async (id, patch) => {
     const saved = await updateTodoCategory(id, patch);
@@ -121,8 +121,8 @@ export function useCategoryStore(userId) {
   }, [load]);
 
   const removeSavingCategory = useCallback(async (id) => {
-    await deleteSavingCategory(id); await load();
-  }, [load]);
+    await deleteSavingCategory(id, userId); await load();
+  }, [userId, load]);
 
   return {
     expenseCategories, incomeCategories, todoCategories, savingCategories,

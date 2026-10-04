@@ -53,7 +53,7 @@ export default function NotesScreen() {
     try {
       setSaving(true);
       if (editing) {
-        const saved = await updateNote(editing.id, { title: cleanTitle, body: cleanBody });
+        const saved = await updateNote(editing.id, { title: cleanTitle, body: cleanBody, user_id: user.id });
         setNotes(prev => prev.map(n => n.id === editing.id ? saved : n));
       } else {
         const saved = await createNote(user.id, { title: cleanTitle, body: cleanBody });
@@ -71,7 +71,7 @@ export default function NotesScreen() {
     if (!pendingDelete) return;
 
     try {
-      await removeNoteFromDb(pendingDelete.id);
+      await removeNoteFromDb(pendingDelete.id, user.id);
       setNotes(prev => prev.filter(n => n.id !== pendingDelete.id));
     } catch (e) {
       Alert.alert(WORDINGS.common.deleteFailed, e.message || WORDINGS.common.unableToDelete);

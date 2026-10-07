@@ -5,9 +5,11 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "scheme": "myapp",
     "splash": {
+      "image": "./assets/icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#adf7d1"
     },
     "assetBundlePatterns": [
@@ -15,13 +17,16 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hashini_dam.myapp"
+      "bundleIdentifier": "com.hashini_dam.myapp",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#adf7d1"
       },
       "package": "com.hashini_dam.myapp",
+      "versionCode": 1,
       "intentFilters": [
         {
           "action": "VIEW",

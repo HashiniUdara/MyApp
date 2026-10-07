@@ -6,20 +6,37 @@
     "base": {
       "node": "24.15.0"
     },
+
     "development": {
       "extends": "base",
       "developmentClient": true,
       "distribution": "internal"
     },
+
     "preview": {
       "extends": "base",
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
       }
     },
+
+    "preview-ios-sim": {
+      "extends": "base",
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      }
+    },
+
     "production": {
-      "extends": "base"
+      "extends": "base",
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   },
   "submit": {

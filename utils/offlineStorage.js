@@ -16,11 +16,12 @@
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../config/appConstants';
 
 // ─── Cache helpers ────────────────────────────────────────────────
 
 function cacheKey(entity, userId) {
-  return `cache:${entity}:${userId}`;
+  return `${STORAGE_KEYS.cachePrefix}:${entity}:${userId}`;
 }
 
 /** Read the cached array for an entity. Returns [] if nothing stored. */
@@ -60,7 +61,7 @@ export async function clearUserCache(userId) {
 // ─── Sync-queue helpers ───────────────────────────────────────────
 
 function queueKey(userId) {
-  return `syncQueue:${userId}`;
+  return `${STORAGE_KEYS.syncQueuePrefix}:${userId}`;
 }
 
 /**

@@ -79,7 +79,7 @@ function MainApp() {
       case 'notes':
         return <NotesScreen />;
       case 'splitbills':
-        return <SplitBillsScreen />;
+        return <SplitBillsScreen onFinanceChange={store.reload} />;
       case 'calculator':
         return <CalculatorScreen />;
       case 'settings':

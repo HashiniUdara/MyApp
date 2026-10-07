@@ -6,6 +6,40 @@ export const STORAGE_KEYS = {
   // These prefixes are used by utils/offlineStorage.js
   cachePrefix: 'cache',
   syncQueuePrefix: 'syncQueue',
+  // Split-bill → finance link map: "sb_tx_ref:{userId}"
+  splitBillTxRefPrefix: 'sb_tx_ref',
+};
+
+// ── Network / offline ────────────────────────────────────────────────────────
+
+export const NETWORK = {
+  // Timeout in ms for the online-probe HEAD request (utils/networkStatus.js)
+  probeTimeoutMs: 4000,
+  // Interval in ms between periodic online re-checks (utils/networkStatus.js)
+  recheckIntervalMs: 30_000,
+};
+
+// ── Split-bill → finance sync ────────────────────────────────────────────────
+
+export const SPLIT_BILL_FINANCE = {
+  category: 'Split Bill',  // Transaction category name written into the transactions table
+  subcategoryExpense: 'Shared Expense',  // Subcategory for the auto-inserted shared-expense transaction
+};
+
+// ── Split bills expenses tab ─────────────────────────────────────────────────
+
+export const SPLIT_BILL_EXPENSES = {
+  // YYYY-MM key format for expense grouping by month
+  monthKeyFormat: 'YYYY-MM',
+};
+
+// ── Sync-status banner colours ────────────────────────────────────────────────
+
+export const SYNC_BANNER_COLORS = {
+  offlineBg:    '#FEF3C7', // amber-100
+  offlineText:  '#B45309', // amber-700
+  syncingBg:    '#DBEAFE', // blue-100
+  syncingText:  '#1D4ED8', // blue-700
 };
 
 export const COLORS = {

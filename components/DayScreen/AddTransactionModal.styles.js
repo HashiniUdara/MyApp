@@ -85,4 +85,11 @@ export default createThemedStyleSheet((colors) => ({
   },
   addBtnDisabled: { opacity: 0.4 },
   addBtnText:     { color: colors.textPrimary, fontWeight: '700', fontSize: 16 },
+  splitBillNote: {
+    color: colors.mutedText,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 8,
+    fontStyle: 'italic',
+  },
 }));

@@ -65,4 +65,34 @@ export default createThemedStyleSheet((colors) => ({
   legendDotEmpty: { backgroundColor: 'transparent', borderWidth: 2 },
   legendText: { color: colors.mutedText, fontSize: 12, marginRight: 6 },
   hint:       { color: colors.surfaceAlt, fontSize: 12, textAlign: 'center', marginTop: 8 },
+
+  // Edit / Delete buttons below calendar
+  detailActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 28,
+    marginBottom: 8,
+  },
+  detailActionBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 13,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  detailActionEdit: {
+    backgroundColor: colors.surface,
+    borderColor: colors.surfaceAlt,
+  },
+  detailActionDelete: {
+    backgroundColor: colors.surface,
+    borderColor: colors.surfaceAlt,
+  },
+  detailActionText: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
 }));

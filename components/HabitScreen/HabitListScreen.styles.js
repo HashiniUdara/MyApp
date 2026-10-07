@@ -11,13 +11,13 @@ export default createThemedStyleSheet((colors) => ({
   habitInfo:   { flex: 1 },
   habitName:   { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
   habitSub:    { color: colors.mutedText, fontSize: 12, marginTop: 3 },
-  rowActions:  { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  actionBtn: {
-    width: 30, height: 30, borderRadius: 9,
+  // Today's circular checkbox replacing the old edit/delete row actions
+  todayCheckbox: {
+    width: 32, height: 32, borderRadius: 16,
+    borderWidth: 2.5, borderColor: colors.primary,
     alignItems: 'center', justifyContent: 'center',
-    backgroundColor: colors.background, borderWidth: 1, borderColor: colors.surfaceAlt,
+    backgroundColor: 'transparent',
   },
-  chevron:     { color: colors.mutedText, fontSize: 22, marginLeft: 2 },
   fab: { position: 'absolute', bottom: 24, right: 20, width: 58, height: 58, borderRadius: 29, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', shadowColor: colors.shadow, shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.5, shadowRadius: 8, elevation: 8, zIndex: 20 },
   fabText: { color: colors.textPrimary, fontSize: 30, fontWeight: '300', lineHeight: 34 },
   overlay:  { flex: 1, justifyContent: 'flex-end' },

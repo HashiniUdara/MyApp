@@ -9,8 +9,10 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { SYNC_BANNER_COLORS } from '../../config/appConstants';
+import { WORDINGS } from '../../config/wordings';
 
 export default function SyncStatusBanner({ online, syncing, pendingOps }) {
   const opacity = useRef(new Animated.Value(0)).current;
@@ -27,23 +29,26 @@ export default function SyncStatusBanner({ online, syncing, pendingOps }) {
 
   if (!visible && opacity._value === 0) return null;
 
-  let icon  = 'cloud-offline-outline';
-  let color = '#B45309'; // amber-700
-  let bg    = '#FEF3C7'; // amber-100
-  let msg   = 'Offline — changes saved locally';
+  const W = WORDINGS.syncBanner;
+  const C = SYNC_BANNER_COLORS;
+
+  let icon  = W.iconOffline;
+  let color = C.offlineText;
+  let bg    = C.offlineBg;
+  let msg   = W.offline;
 
   if (syncing) {
-    icon  = 'sync-outline';
-    color = '#1D4ED8'; // blue-700
-    bg    = '#DBEAFE'; // blue-100
-    msg   = 'Syncing changes…';
+    icon  = W.iconSyncing;
+    color = C.syncingText;
+    bg    = C.syncingBg;
+    msg   = W.syncing;
   } else if (!online && pendingOps > 0) {
-    msg = `Offline — ${pendingOps} change${pendingOps !== 1 ? 's' : ''} pending sync`;
+    msg = W.offlinePending(pendingOps);
   } else if (online && pendingOps > 0) {
-    icon  = 'time-outline';
-    color = '#B45309';
-    bg    = '#FEF3C7';
-    msg   = `Syncing ${pendingOps} pending change${pendingOps !== 1 ? 's' : ''}…`;
+    icon  = W.iconPending;
+    color = C.offlineText;
+    bg    = C.offlineBg;
+    msg   = W.syncingPending(pendingOps);
   }
 
   return (

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useHabits } from '../../store/habitStore/HabitContext';
 import styles from './HabitDetailScreen.styles';
 import { themeColor } from '../../config/theme';
@@ -27,7 +28,7 @@ function buildGrid(year, month) {
   return cells;
 }
 
-export default function HabitDetailScreen({ habit, onBack }) {
+export default function HabitDetailScreen({ habit, onBack, onEdit, onDelete }) {
   const { toggleDay, isDone, monthCount, streak } = useHabits();
 
   const now = new Date();
@@ -37,12 +38,12 @@ export default function HabitDetailScreen({ habit, onBack }) {
   const grid     = useMemo(() => buildGrid(year, month), [year, month]);
   const todayStr = now.toISOString().split('T')[0];
 
-  const yearMonth  = `${year}-${pad(month + 1)}`;
-  const doneCount  = monthCount(habit.id, yearMonth);
-  const totalDays  = new Date(year, month + 1, 0).getDate();
+  const yearMonth     = `${year}-${pad(month + 1)}`;
+  const doneCount     = monthCount(habit.id, yearMonth);
+  const totalDays     = new Date(year, month + 1, 0).getDate();
   const currentStreak = streak(habit.id);
 
-  // Split into rows of 7
+  // Split grid cells into rows of 7
   const rows = [];
   for (let i = 0; i < grid.length; i += 7) rows.push(grid.slice(i, i + 7));
 
@@ -56,15 +57,20 @@ export default function HabitDetailScreen({ habit, onBack }) {
   };
 
   const handleDayPress = (dateStr) => {
-    // Don't allow marking future dates
-    if (dateStr > todayStr) return;
+    if (dateStr > todayStr) return; // no future dates
     toggleDay(habit.id, dateStr);
+  };
+
+  const handleDelete = () => {
+    // HabitScreen owns the confirm dialog and also handles navigating back
+    // after the habit is confirmed deleted.
+    onDelete?.(habit);
   };
 
   return (
     <View style={styles.container}>
 
-      {/* Header */}
+      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
           <Text style={styles.backArrow}>‹</Text>
@@ -78,7 +84,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
 
       <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
 
-        {/* Stats row */}
+        {/* ── Stats row ── */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderColor: habit.color }]}>
             <Text style={[styles.statValue, { color: habit.color }]}>{currentStreak}</Text>
@@ -96,7 +102,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
           </View>
         </View>
 
-        {/* Year navigator */}
+        {/* ── Year navigator ── */}
         <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={() => setYear(y => y - 1)}>
             <Text style={styles.navArrow}>‹</Text>
@@ -107,7 +113,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
           </TouchableOpacity>
         </View>
 
-        {/* Month navigator */}
+        {/* ── Month navigator ── */}
         <View style={styles.navRow}>
           <TouchableOpacity style={styles.navBtn} onPress={prevMonth}>
             <Text style={styles.navArrow}>‹</Text>
@@ -118,7 +124,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
           </TouchableOpacity>
         </View>
 
-        {/* Weekday header */}
+        {/* ── Weekday header ── */}
         <View style={styles.weekRow}>
           {WEEKDAYS_MON.map(d => (
             <View key={d} style={styles.weekCell}>
@@ -127,7 +133,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
           ))}
         </View>
 
-        {/* Calendar grid */}
+        {/* ── Calendar grid ── */}
         <View style={styles.grid}>
           {rows.map((row, ri) => (
             <View key={ri} style={styles.row}>
@@ -166,7 +172,7 @@ export default function HabitDetailScreen({ habit, onBack }) {
           ))}
         </View>
 
-        {/* Legend */}
+        {/* ── Legend ── */}
         <View style={styles.legend}>
           <View style={[styles.legendDot, { backgroundColor: habit.color }]} />
           <Text style={styles.legendText}>{WORDINGS.habits.completed}</Text>
@@ -177,6 +183,29 @@ export default function HabitDetailScreen({ habit, onBack }) {
         </View>
 
         <Text style={styles.hint}>{WORDINGS.habits.hint}</Text>
+
+        {/* ── Edit / Delete buttons below calendar ── */}
+        <View style={styles.detailActions}>
+          <TouchableOpacity
+            style={[styles.detailActionBtn, styles.detailActionEdit]}
+            onPress={() => onEdit?.(habit)}
+          >
+            <Ionicons name="pencil-outline" size={18} color={themeColor('primary')} />
+            <Text style={[styles.detailActionText, { color: themeColor('primary') }]}>
+              {WORDINGS.habits.editHabit}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.detailActionBtn, styles.detailActionDelete]}
+            onPress={handleDelete}
+          >
+            <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
+            <Text style={[styles.detailActionText, { color: themeColor('danger') }]}>
+              {WORDINGS.common.delete}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
       </ScrollView>
     </View>

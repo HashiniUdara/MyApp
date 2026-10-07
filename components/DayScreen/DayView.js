@@ -17,6 +17,7 @@ import ConfirmDialog from '../common/ConfirmDialog';
 import { Ionicons } from '@expo/vector-icons';
 import { themeColor } from '../../config/theme';
 import { WORDINGS } from '../../config/wordings';
+import { SPLIT_BILL_FINANCE } from '../../config/appConstants';
 
 export default function DayView({ date, transactions, onAdd, onUpdate, onRemove, expenseCategories, incomeCategories }) {
   const [modalVisible,        setModalVisible]        = useState(false);
@@ -113,9 +114,11 @@ export default function DayView({ date, transactions, onAdd, onUpdate, onRemove,
               <Text style={item.type === 'income' ? styles.incomeAmount : styles.expenseAmount}>
                 {item.type === 'income' ? '+' : '-'} {item.amount.toFixed(2)}
               </Text>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => setPendingDelete(item)}>
-                <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
-              </TouchableOpacity>
+              {item.category !== SPLIT_BILL_FINANCE.category && (
+                <TouchableOpacity style={styles.actionBtn} onPress={() => setPendingDelete(item)}>
+                  <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
+                </TouchableOpacity>
+              )}
             </TouchableOpacity>
           ))
         )}

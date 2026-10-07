@@ -13,6 +13,7 @@ import styles from './AddTransactionModal.styles';
 import { useCategories } from '../../store/categoryStore/CategoryContext';
 import { themeColor } from '../../config/theme';
 import { WORDINGS } from '../../config/wordings';
+import { SPLIT_BILL_FINANCE } from '../../config/appConstants';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -257,11 +258,19 @@ export default function AddTransactionModal({
 
             {/* Submit */}
             <TouchableOpacity
-              style={[styles.addBtn, (!category || !subcategory || !amount) && styles.addBtnDisabled]}
+              style={[
+                styles.addBtn,
+                (!category || !subcategory || !amount) && styles.addBtnDisabled,
+                (isEditing && editingTransaction?.category === SPLIT_BILL_FINANCE.category) && styles.addBtnDisabled,
+              ]}
               onPress={handleSubmit}
+              disabled={isEditing && editingTransaction?.category === SPLIT_BILL_FINANCE.category}
             >
               <Text style={styles.addBtnText}>{isEditing ? WORDINGS.common.saveChanges : WORDINGS.common.add}</Text>
             </TouchableOpacity>
+            {isEditing && editingTransaction?.category === SPLIT_BILL_FINANCE.category && (
+              <Text style={styles.splitBillNote}>{WORDINGS.splitBills.splitBillTransactionNote}</Text>
+            )}
 
           </ScrollView>
         </View>

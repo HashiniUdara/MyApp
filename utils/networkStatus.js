@@ -16,9 +16,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { SUPABASE_URL } from '../store/supabaseClient';
+import { NETWORK } from '../config/appConstants';
 
-const PROBE_URL     = `${SUPABASE_URL}/rest/v1/`;
-const PROBE_TIMEOUT = 4000; // ms
+const PROBE_URL = `${SUPABASE_URL}/rest/v1/`;
 
 /**
  * Returns true when a quick HEAD request to the Supabase endpoint
@@ -27,7 +27,7 @@ const PROBE_TIMEOUT = 4000; // ms
 export async function isOnline() {
   try {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), PROBE_TIMEOUT);
+    const timer = setTimeout(() => controller.abort(), NETWORK.probeTimeoutMs);
     const res = await fetch(PROBE_URL, {
       method: 'HEAD',
       signal: controller.signal,
@@ -60,8 +60,8 @@ export function useNetwork() {
       if (state === 'active') check();
     });
 
-    // Periodic background check every 30 s
-    timerRef.current = setInterval(check, 30_000);
+    // Periodic background check
+    timerRef.current = setInterval(check, NETWORK.recheckIntervalMs);
 
     return () => {
       sub.remove();

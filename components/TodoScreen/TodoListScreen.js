@@ -50,7 +50,7 @@ function TodoItem({ todo, readOnly, onToggle, onEdit, onRequestDelete, getCatego
         <Ionicons
           name={todo.completed ? 'checkmark-circle' : 'ellipse-outline'}
           size={24}
-          color={todo.completed ? cat.color : themeColor('surfaceAlt')}
+          color={cat.color}
         />
       </TouchableOpacity>
 

@@ -40,13 +40,22 @@ async function _create(entity, userId, body) {
 }
 
 async function _update(entity, userId, id, body) {
+  // Optimistic local update first — UI is instant
   await patchCache(entity, userId, (prev) =>
     prev.map((r) => (r.id === id ? { ...r, ...body } : r)),
   );
   if (await isOnline()) {
     try {
-      return await dbQuery(entity, { method: 'PATCH', body, filters: [`id=eq.${id}`], single: true });
-    } catch { /* fall through */ }
+      const saved = await dbQuery(entity, { method: 'PATCH', body, filters: [`id=eq.${id}`], single: true });
+      // Write the server-confirmed record back so the next _fetch returns
+      // the authoritative value (e.g. amount: 0 actually persisted).
+      if (saved) {
+        await patchCache(entity, userId, (prev) =>
+          prev.map((r) => (r.id === id ? saved : r)),
+        );
+      }
+      return saved;
+    } catch { /* fall through to queue */ }
   }
   await enqueue(userId, { id: generateUUID(), entity, op: 'update', recordId: id, payload: body, userId });
   return { id, ...body };

@@ -67,6 +67,9 @@ export const WORDINGS = {
     enterPersonName: 'Enter a person name',
     expenseDeleteConfirm: (name) => `Delete "${name}"? This can't be undone.`,
     personDeleteConfirm: (name) => `Delete "${name}"? This can't be undone.`,
+    amountZeroError: 'Amount must be greater than 0.',
+    amountZeroEditHint: 'Set amount to 0 to remove this expense from your finance records.',
+    splitBillTransactionNote: 'Managed by Split Bills — edit or remove it there.',
   },
   graph: {
     title: 'Finance Graph',
@@ -211,6 +214,7 @@ export const WORDINGS = {
     amount: 'Amount (LKR)',
   },
   habits: {
+    title: 'Habits',
     streak: '🔥 Streak',
     thisMonth: '✅ This Month',
     rate: '📊 Rate',
@@ -293,5 +297,14 @@ export const WORDINGS = {
     expectedSpend: 'Expected spend by today',
     day: 'Day',
     percentageSign: '%',
-  }
+  },
+  syncBanner: {
+    offline: 'Offline — changes saved locally',
+    offlinePending: (count) => `Offline — ${count} change${count !== 1 ? 's' : ''} pending sync`,
+    syncing: 'Syncing changes…',
+    syncingPending: (count) => `Syncing ${count} pending change${count !== 1 ? 's' : ''}…`,
+    iconOffline: 'cloud-offline-outline',
+    iconSyncing: 'sync-outline',
+    iconPending: 'time-outline',
+  },
 };

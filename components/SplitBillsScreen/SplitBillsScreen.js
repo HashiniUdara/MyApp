@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ConfirmDialog from '../common/ConfirmDialog';
 import { useAuth } from '../../store/authStore/AuthContext';
 import { WORDINGS } from '../../config/wordings';
-import { SPLIT_BILL_TABS } from '../../config/appConstants';
+import { SPLIT_BILL_TABS, MONTHS, MONTHS_SHORT } from '../../config/appConstants';
 import styles from './SplitBillsScreen.styles';
 import { themeColor } from '../../config/theme';
 import { toDateStr, parseDateStr } from '../../utils/dateUtils';
@@ -34,6 +34,11 @@ import {
   fetchSplitBillSettlements,
   createSplitBillSettlement,
 } from '../../store/splitBillApi';
+import {
+  ensureSplitBillCategory,
+  syncExpense,
+  removeExpenseSync,
+} from '../../store/splitBillFinanceSync';
 
 const normalizeExpense = (item) => ({
   id: item.id,
@@ -114,7 +119,7 @@ const calculateSplitsFromExpense = (expense) => {
   return calculateSplitsFromExpense({ ...expense, splitType: 'equally' });
 };
 
-export default function SplitBillsScreen() {
+export default function SplitBillsScreen({ onFinanceChange }) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('expenses');
   const [people, setPeople] = useState([]);
@@ -138,6 +143,7 @@ export default function SplitBillsScreen() {
   const [manualSplits, setManualSplits] = useState({});
   const [percentages, setPercentages] = useState({});
   const [splitValidationError, setSplitValidationError] = useState('');
+  const [amountError, setAmountError] = useState('');
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [showGroupModal, setShowGroupModal] = useState(false);
@@ -149,6 +155,13 @@ export default function SplitBillsScreen() {
   const [settlements, setSettlements] = useState([]);
   const [expandedSettlementKeys, setExpandedSettlementKeys] = useState(new Set());
   const [settlementInputs, setSettlementInputs] = useState({});
+
+  // Month sections in the expenses tab — current month open by default, past collapsed
+  const currentMonthKey = (() => {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, '0')}`;
+  })();
+  const [collapsedMonths, setCollapsedMonths] = useState(new Set());
 
   const allPeople = people;
 
@@ -215,6 +228,8 @@ export default function SplitBillsScreen() {
         setSelectedGroupId(groupsData?.[0]?.id ?? null);
         setExpenses((expensesData ?? []).map(normalizeExpense));
         setSettlements(settlementsData ?? []);
+        // Ensure the "Split Bill" category exists in daily finance (idempotent)
+        ensureSplitBillCategory(user.id).catch(() => {});
       } catch (error) {
         console.warn('SplitBills load error', error);
       } finally {
@@ -324,7 +339,12 @@ export default function SplitBillsScreen() {
   const saveExpense = async () => {
     if (!user?.id) return;
     const cleanedAmount = Number(amount);
-    if (!description.trim() || Number.isNaN(cleanedAmount) || cleanedAmount <= 0) return;
+
+    if (!description.trim()) return;
+    if (isNaN(cleanedAmount) || cleanedAmount <= 0) {
+      setSplitValidationError(WORDINGS.splitBills.amountZeroError);
+      return;
+    }
 
     // Validate based on split type
     setSplitValidationError('');
@@ -374,9 +394,22 @@ export default function SplitBillsScreen() {
     try {
       if (editingExpense) {
         await updateSplitBillExpense(editingExpense.id, payload, user.id);
+        // Sync the updated share to daily finance
+        const updatedExpense = normalizeExpense({
+          ...payload,
+          id: editingExpense.id,
+          splits: computedSplits,
+        });
+        const groupName = groupNameById[expenseGroupId] ?? '';
+        await syncExpense({ userId: user.id, expense: updatedExpense, groupName, isUpdate: true });
       } else {
-        await createSplitBillExpense(user.id, payload);
+        const saved = await createSplitBillExpense(user.id, payload);
+        // Sync user's share to daily finance
+        const newExpense = normalizeExpense({ ...payload, id: saved.id, splits: computedSplits });
+        const groupName = groupNameById[expenseGroupId] ?? '';
+        await syncExpense({ userId: user.id, expense: newExpense, groupName, isUpdate: false });
       }
+      onFinanceChange?.();
       await loadData();
       setShowExpenseModal(false);
       resetExpenseForm();
@@ -428,6 +461,9 @@ export default function SplitBillsScreen() {
     if (!user?.id || !pendingDeleteExpense) return;
     try {
       await deleteSplitBillExpense(pendingDeleteExpense.id, user.id);
+      // Remove the linked daily-finance transaction
+      await removeExpenseSync({ userId: user.id, expenseId: pendingDeleteExpense.id });
+      onFinanceChange?.();
       await loadData();
     } catch (error) {
       console.warn('Delete expense error', error);
@@ -607,6 +643,7 @@ export default function SplitBillsScreen() {
         to_person: transfer.toId,
         amount: amountToSettle,
       });
+      onFinanceChange?.();
       await loadData();
       setSettlementInputs((current) => ({ ...current, [key]: '' }));
     } catch (error) {
@@ -626,6 +663,7 @@ export default function SplitBillsScreen() {
         to_person: transfer.toId,
         amount: amountToSettle,
       });
+      onFinanceChange?.();
       await loadData();
       setSettlementInputs((current) => ({ ...current, [key]: '' }));
     } catch (error) {
@@ -653,82 +691,142 @@ export default function SplitBillsScreen() {
     );
   };
 
-  const renderExpensesTab = () => (
-    <View>
-      {renderGroupSelector()}
-      <View style={styles.sectionCard}>
-        <Text style={styles.sectionSubtitle}>{WORDINGS.splitBills.expensesSubtitle}</Text>
-      </View>
+  const renderExpensesTab = () => {
+    // Group expenses by YYYY-MM, newest month first
+    const monthGroups = {};
+    filteredExpenses.forEach((expense) => {
+      const monthKey = expense.date ? expense.date.slice(0, 7) : currentMonthKey;
+      if (!monthGroups[monthKey]) monthGroups[monthKey] = [];
+      monthGroups[monthKey].push(expense);
+    });
+    const sortedMonthKeys = Object.keys(monthGroups).sort((a, b) => b.localeCompare(a));
 
-      {filteredExpenses.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyStateText}>{WORDINGS.splitBills.noExpenses}</Text>
+    const formatMonthLabel = (key) => {
+      const [y, m] = key.split('-');
+      return `${MONTHS[Number(m) - 1]} ${y}`;
+    };
+
+    return (
+      <View>
+        {renderGroupSelector()}
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionSubtitle}>{WORDINGS.splitBills.expensesSubtitle}</Text>
         </View>
-      ) : (
-        filteredExpenses.map((expense) => {
-          const expanded = expandedExpenses.has(expense.id);
-          return (
-            <View key={expense.id} style={styles.expenseCard}>
-              <TouchableOpacity
-                style={styles.expenseTitleRow}
-                onPress={() => toggleExpenseDetails(expense.id)}
-                activeOpacity={0.8}
-              >
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.expenseTitle}>{expense.description}</Text>
-                  <Text style={styles.expenseAmount}>LKR {expense.amount.toFixed(2)}</Text>
-                </View>
-                <Ionicons
-                  name={expanded ? 'chevron-up' : 'chevron-down'}
-                  size={22}
-                  color={themeColor('textSecondary')}
-                />
-              </TouchableOpacity>
 
-              {expanded && (
-                <View style={styles.expenseDetails}>
-                  <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>{WORDINGS.splitBills.paidBy}</Text>
-                    <Text style={styles.metaValue}>{personNameById[expense.paidBy] || expense.paidBy}</Text>
-                  </View>
-                  <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>{WORDINGS.splitBills.date}</Text>
-                    <Text style={styles.metaValue}>{expense.date}</Text>
-                  </View>
-                  {expense.groupId ? (
-                    <View style={styles.metaRow}>
-                      <Text style={styles.metaLabel}>{WORDINGS.splitBills.group}</Text>
-                      <Text style={styles.metaValue}>{groupNameById[expense.groupId] || WORDINGS.splitBills.noGroups}</Text>
+        {filteredExpenses.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>{WORDINGS.splitBills.noExpenses}</Text>
+          </View>
+        ) : (
+          sortedMonthKeys.map((monthKey) => {
+            const isCurrentMonth = monthKey === currentMonthKey;
+
+            // A month is collapsed if:
+            //   - It's been explicitly collapsed (in collapsedMonths), OR
+            //   - It's a past month AND the user hasn't explicitly opened it
+            const effectivelyCollapsed = collapsedMonths.has(monthKey)
+              ? true
+              : !isCurrentMonth && !collapsedMonths.has(monthKey + '_opened');
+
+            return (
+              <View key={monthKey}>
+                {/* Month header */}
+                <TouchableOpacity
+                  style={styles.monthHeader}
+                  onPress={() => {
+                    setCollapsedMonths((prev) => {
+                      const next = new Set(prev);
+                      if (effectivelyCollapsed) {
+                        // Opening: remove collapse flag, add 'opened' marker for past months
+                        next.delete(monthKey);
+                        if (!isCurrentMonth) next.add(monthKey + '_opened');
+                      } else {
+                        // Closing: add collapse flag, remove 'opened' marker
+                        next.add(monthKey);
+                        next.delete(monthKey + '_opened');
+                      }
+                      return next;
+                    });
+                  }}
+                  activeOpacity={0.7}
+                >
+                  <Text style={styles.monthHeaderText}>{formatMonthLabel(monthKey)}</Text>
+                  <Ionicons
+                    name={effectivelyCollapsed ? 'chevron-down' : 'chevron-up'}
+                    size={20}
+                    color={themeColor('textSecondary')}
+                  />
+                </TouchableOpacity>
+
+                {/* Expenses in this month */}
+                {!effectivelyCollapsed && monthGroups[monthKey].map((expense) => {
+                  const expanded = expandedExpenses.has(expense.id);
+                  return (
+                    <View key={expense.id} style={styles.expenseCard}>
+                      <TouchableOpacity
+                        style={styles.expenseTitleRow}
+                        onPress={() => toggleExpenseDetails(expense.id)}
+                        activeOpacity={0.8}
+                      >
+                        <View style={{ flex: 1 }}>
+                          <Text style={styles.expenseTitle}>{expense.description}</Text>
+                          <Text style={styles.expenseAmount}>LKR {expense.amount.toFixed(2)}</Text>
+                        </View>
+                        <Ionicons
+                          name={expanded ? 'chevron-up' : 'chevron-down'}
+                          size={22}
+                          color={themeColor('textSecondary')}
+                        />
+                      </TouchableOpacity>
+
+                      {expanded && (
+                        <View style={styles.expenseDetails}>
+                          <View style={styles.metaRow}>
+                            <Text style={styles.metaLabel}>{WORDINGS.splitBills.paidBy}</Text>
+                            <Text style={styles.metaValue}>{personNameById[expense.paidBy] || expense.paidBy}</Text>
+                          </View>
+                          <View style={styles.metaRow}>
+                            <Text style={styles.metaLabel}>{WORDINGS.splitBills.date}</Text>
+                            <Text style={styles.metaValue}>{expense.date}</Text>
+                          </View>
+                          {expense.groupId ? (
+                            <View style={styles.metaRow}>
+                              <Text style={styles.metaLabel}>{WORDINGS.splitBills.group}</Text>
+                              <Text style={styles.metaValue}>{groupNameById[expense.groupId] || WORDINGS.splitBills.noGroups}</Text>
+                            </View>
+                          ) : null}
+                          <View style={styles.metaRow}>
+                            <Text style={styles.metaLabel}>{WORDINGS.splitBills.splitWith}</Text>
+                            <Text style={styles.metaValue}>
+                              {expense.splitWith.map((id) => personNameById[id] || id).join(', ')}
+                            </Text>
+                          </View>
+                          <View style={styles.expenseActionRow}>
+                            <TouchableOpacity
+                              style={styles.iconButton}
+                              onPress={() => openExpenseModal(expense)}
+                            >
+                              <Ionicons name="pencil-outline" size={18} color={themeColor('textPrimary')} />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                              style={[styles.iconButton, styles.iconButtonDelete]}
+                              onPress={() => deleteExpense(expense)}
+                            >
+                              <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
+                            </TouchableOpacity>
+                          </View>
+                        </View>
+                      )}
                     </View>
-                  ) : null}
-                  <View style={styles.metaRow}>
-                    <Text style={styles.metaLabel}>{WORDINGS.splitBills.splitWith}</Text>
-                    <Text style={styles.metaValue}>
-                      {expense.splitWith.map((id) => personNameById[id] || id).join(', ')}
-                    </Text>
-                  </View>
-                  <View style={styles.expenseActionRow}>
-                    <TouchableOpacity
-                      style={styles.iconButton}
-                      onPress={() => openExpenseModal(expense)}
-                    >
-                      <Ionicons name="pencil-outline" size={18} color={themeColor('textPrimary')} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={[styles.iconButton, styles.iconButtonDelete]}
-                      onPress={() => deleteExpense(expense)}
-                    >
-                      <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </View>
-          );
-        })
-      )}
-    </View>
-  );
+                  );
+                })}
+              </View>
+            );
+          })
+        )}
+      </View>
+    );
+  };
 
   const renderBalanceTab = () => (
     <View>
@@ -1040,7 +1138,7 @@ export default function SplitBillsScreen() {
             <Text style={styles.fieldLabel}>{WORDINGS.splitBills.amount}</Text>
             <TextInput
               value={amount}
-              onChangeText={setAmount}
+              onChangeText={(v) => { setAmount(v); setSplitValidationError(''); }}
               placeholder="0.00"
               placeholderTextColor={themeColor('mutedText')}
               keyboardType="decimal-pad"

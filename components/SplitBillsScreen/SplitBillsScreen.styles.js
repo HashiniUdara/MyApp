@@ -64,6 +64,23 @@ export default createThemedStyleSheet((colors) => ({
     color: colors.mutedText,
     fontSize: 13,
   },
+  monthHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    paddingHorizontal: 4,
+    marginTop: 8,
+    marginBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.surfaceAlt,
+  },
+  monthHeaderText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    textTransform: 'capitalize',
+  },
   expenseCard: {
     backgroundColor: colors.surfaceAlt,
     borderRadius: 16,
@@ -420,5 +437,12 @@ export default createThemedStyleSheet((colors) => ({
     fontWeight: '600',
     marginTop: 8,
     marginBottom: 4,
+  },
+  hintText: {
+    color: colors.mutedText,
+    fontSize: 12,
+    marginTop: 4,
+    marginBottom: 2,
+    fontStyle: 'italic',
   },
 }));

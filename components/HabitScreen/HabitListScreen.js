@@ -1,76 +1,28 @@
-import { useState } from 'react';
-import {
-  View, Text, ScrollView, TouchableOpacity,
-  Modal, TextInput, StyleSheet,
-} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useHabits } from '../../store/habitStore/HabitContext';
-import ConfirmDialog from '../common/ConfirmDialog';
 import styles from './HabitListScreen.styles';
 import { themeColor } from '../../config/theme';
 import { WORDINGS } from '../../config/wordings';
-import { EMOJIS } from '../../config/appConstants';
 
+export default function HabitListScreen({ onSelectHabit, onAddHabit, onEditHabit, onDeleteHabit }) {
+  const { habits, toggleDay, isDone, streak } = useHabits();
 
-export default function HabitListScreen({ onSelectHabit }) {
-  const { habits, addHabit, editHabit, removeHabit, streak, COLORS } = useHabits();
-
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingHabit, setEditingHabit] = useState(null);
-  const [name,  setName]  = useState('');
-  const [emoji, setEmoji] = useState(EMOJIS[0]);
-  const [color, setColor] = useState(COLORS[0]);
-  const [pendingDelete, setPendingDelete] = useState(null);
-
-  const resetForm = () => {
-    setEditingHabit(null);
-    setName('');
-    setEmoji(EMOJIS[0]);
-    setColor(COLORS[0]);
-  };
-
-  const openAdd = () => {
-    resetForm();
-    setModalVisible(true);
-  };
-
-  const openEdit = (habit) => {
-    setEditingHabit(habit);
-    setName(habit.name ?? '');
-    setEmoji(habit.emoji ?? EMOJIS[0]);
-    setColor(habit.color ?? COLORS[0]);
-    setModalVisible(true);
-  };
-
-  const closeSheet = () => {
-    setModalVisible(false);
-    resetForm();
-  };
-
-  const handleSave = async () => {
-    if (!name.trim()) return;
-    const payload = { name: name.trim(), emoji, color };
-    if (editingHabit) await editHabit(editingHabit.id, payload);
-    else await addHabit(payload);
-    closeSheet();
-  };
-
-  const confirmDelete = () => {
-    if (pendingDelete) removeHabit(pendingDelete.id);
-    setPendingDelete(null);
-  };
+  const todayStr = new Date().toISOString().split('T')[0];
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.inner} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>Habits</Text>
+        <Text style={styles.title}>{WORDINGS.habits.title}</Text>
 
         {habits.length === 0 && (
           <Text style={styles.empty}>{WORDINGS.habits.empty}</Text>
         )}
 
         {habits.map(habit => {
-          const s = streak(habit.id);
+          const s        = streak(habit.id);
+          const donToday = isDone(habit.id, todayStr);
+
           return (
             <TouchableOpacity
               key={habit.id}
@@ -78,21 +30,36 @@ export default function HabitListScreen({ onSelectHabit }) {
               onPress={() => onSelectHabit(habit)}
               activeOpacity={0.75}
             >
-              <View style={[styles.emojiCircle, { backgroundColor: habit.color + '22' }]}> 
+              {/* Emoji */}
+              <View style={[styles.emojiCircle, { backgroundColor: habit.color + '22' }]}>
                 <Text style={styles.emojiText}>{habit.emoji}</Text>
               </View>
+
+              {/* Name + streak */}
               <View style={styles.habitInfo}>
                 <Text style={styles.habitName}>{habit.name}</Text>
-                <Text style={styles.habitSub}>{s > 0 ? WORDINGS.habits.haveStreak(s) : WORDINGS.habits.noStreak}</Text>
+                <Text style={styles.habitSub}>
+                  {s > 0 ? WORDINGS.habits.haveStreak(s) : WORDINGS.habits.noStreak}
+                </Text>
               </View>
-              <View style={styles.rowActions}>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => openEdit(habit)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="pencil" size={18} color={themeColor('primary')} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => setPendingDelete(habit)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
-                  <Ionicons name="trash-outline" size={18} color={themeColor('danger')} />
-                </TouchableOpacity>
-              </View>
+
+              {/* Today checkbox */}
+              <TouchableOpacity
+                style={[
+                  styles.todayCheckbox,
+                  donToday && { backgroundColor: habit.color, borderColor: habit.color },
+                ]}
+                onPress={(e) => {
+                  e.stopPropagation?.();
+                  toggleDay(habit.id, todayStr);
+                }}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                activeOpacity={0.7}
+              >
+                {donToday && (
+                  <Ionicons name="checkmark" size={16} color={themeColor('textPrimary')} />
+                )}
+              </TouchableOpacity>
             </TouchableOpacity>
           );
         })}
@@ -100,58 +67,10 @@ export default function HabitListScreen({ onSelectHabit }) {
         <View style={{ height: 100 }} />
       </ScrollView>
 
-      <TouchableOpacity style={styles.fab} onPress={openAdd}>
+      {/* FAB — add new habit */}
+      <TouchableOpacity style={styles.fab} onPress={onAddHabit}>
         <Ionicons name="add" size={28} color={themeColor('textPrimary')} />
       </TouchableOpacity>
-
-      <ConfirmDialog
-        visible={!!pendingDelete}
-        title= {WORDINGS.habits.confirmDelete}
-        message={pendingDelete ? WORDINGS.common.deleteMessage(pendingDelete.name) : ''}
-        confirmLabel={WORDINGS.common.delete}
-        destructive
-        onConfirm={confirmDelete}
-        onCancel={() => setPendingDelete(null)}
-      />
-
-      <Modal visible={modalVisible} transparent animationType="slide" onRequestClose={closeSheet}>
-        <View style={styles.overlay}>
-          <TouchableOpacity style={styles.backdrop} activeOpacity={1} onPress={closeSheet} />
-          <View style={styles.sheet}>
-            <View style={styles.handle} />
-            <Text style={styles.sheetTitle}>{editingHabit ? WORDINGS.habits.editHabit : WORDINGS.habits.newHabit}</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder={WORDINGS.habits.habitNamePlaceholder}
-              placeholderTextColor={themeColor('mutedText')}
-              value={name}
-              onChangeText={setName}
-              maxLength={40}
-            />
-
-            <Text style={styles.sheetLabel}>{WORDINGS.habits.iconLabel}</Text>
-            <View style={styles.emojiGrid}>
-              {EMOJIS.map(e => (
-                <TouchableOpacity key={e} style={[styles.emojiOption, emoji === e && styles.emojiOptionActive]} onPress={() => setEmoji(e)}>
-                  <Text style={styles.emojiOptionText}>{e}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <Text style={styles.sheetLabel}>{WORDINGS.habits.colorLabel}</Text>
-            <View style={styles.colorRow}>
-              {COLORS.map((c, index) => (
-                <TouchableOpacity key={`${c}-${index}`} style={[styles.colorDot, { backgroundColor: c }, color === c && styles.colorDotActive]} onPress={() => setColor(c)} />
-              ))}
-            </View>
-
-            <TouchableOpacity style={[styles.addBtn, !name.trim() && styles.addBtnDisabled]} onPress={handleSave}>
-              <Text style={styles.addBtnText}>{editingHabit ? WORDINGS.common.saveChanges : WORDINGS.common.add}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

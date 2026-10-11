@@ -75,10 +75,6 @@ export default function DayView({ date, transactions, onAdd, onUpdate, onRemove,
       >
         <Text style={styles.title}>{WORDINGS.dayfinance.title}</Text>
 
-        {dayTxns.length === 0 && (
-          <Text style={styles.empty}>{WORDINGS.dayfinance.notransactions}</Text>
-        )}
-
         {/* Summary cards */}
         <View style={styles.summaryRow}>
           <View style={styles.summaryCard}>

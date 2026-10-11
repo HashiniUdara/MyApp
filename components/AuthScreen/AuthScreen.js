@@ -50,6 +50,7 @@ export default function AuthScreen() {
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState('');
   const [success,  setSuccess]  = useState('');
+  const [emailExists, setEmailExists] = useState(false);   // sign-up: email already has an account
 
   // ── Forgot password state ─────────────────────────────────────
   const [resetStep,       setResetStep]       = useState('request');
@@ -59,7 +60,7 @@ export default function AuthScreen() {
   const [newPassConfirm,  setNewPassConfirm]  = useState('');
 
   const switchMode = (m) => {
-    setMode(m); setError(''); setSuccess('');
+    setMode(m); setError(''); setSuccess(''); setEmailExists(false);
     if (m === 'forgot') {
       setResetStep('request'); setResetEmail(email.trim());
       setResetCode(''); setNewPass(''); setNewPassConfirm('');
@@ -68,6 +69,7 @@ export default function AuthScreen() {
 
   // ── Sign in / Sign up ─────────────────────────────────────────
   const handleSubmit = async () => {
+    if (mode === 'signup' && emailExists) return;
     setError(''); setSuccess('');
     if (!email.trim() || !password.trim()) { setError('Email and password are required.'); return; }
     if (mode === 'signup' && password !== confirm) { setError('Passwords do not match.'); return; }
@@ -85,7 +87,9 @@ export default function AuthScreen() {
       const msg = e.message ?? '';
       if (msg.includes('Email not confirmed'))       setError('Please confirm your email first. Check your inbox for the confirmation link.');
       else if (msg.includes('Invalid login'))        setError('Wrong email or password.');
-      else if (msg.includes('User already registered')) setError('An account with this email already exists. Try signing in.');
+      else if (msg.includes('User already registered') || msg.toLowerCase().includes('already been registered')) {
+        setEmailExists(true);   // shown inline under the email field; disables Create Account
+      }
       else setError(msg);
     } finally { setLoading(false); }
   };
@@ -228,20 +232,26 @@ export default function AuthScreen() {
             placeholder="you@example.com"
             placeholderTextColor={themeColor('placeholder')}
             value={email}
-            onChangeText={setEmail}
+            onChangeText={(t) => { setEmail(t); if (emailExists) setEmailExists(false); }}
             autoCapitalize="none"
             keyboardType="email-address"
           />
+          {mode === 'signup' && emailExists && (
+            <Text style={styles.fieldError}>
+              {WORDINGS.auth.inlineMessage}{' '}
+              <Text style={styles.hintLink} onPress={() => switchMode('login')}>{WORDINGS.auth.backToSignIn}</Text>
+            </Text>
+          )}
 
           {/* Password with eye icon */}
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>{WORDINGS.auth.password}</Text>
           <PasswordInput value={password} onChangeText={setPassword} />
 
           {/* Confirm password with eye icon */}
           {mode === 'signup' && (
             <>
-              <Text style={styles.label}>Confirm Password</Text>
-              <PasswordInput value={confirm} onChangeText={setConfirm} placeholder="Repeat password" />
+              <Text style={styles.label}>{WORDINGS.auth.confirmPassword}</Text>
+              <PasswordInput value={confirm} onChangeText={setConfirm} placeholder={WORDINGS.auth.confirmNewPasswordPlaceholder} />
             </>
           )}
 
@@ -254,9 +264,9 @@ export default function AuthScreen() {
           {!!error && <Text style={styles.error}>{error}</Text>}
 
           <TouchableOpacity
-            style={[styles.btn, loading && styles.btnDisabled]}
+            style={[styles.btn, (loading || (mode === 'signup' && emailExists)) && styles.btnDisabled]}
             onPress={handleSubmit}
-            disabled={loading}
+            disabled={loading || (mode === 'signup' && emailExists)}
           >
             {loading
               ? <ActivityIndicator color={themeColor('textPrimary')} />
@@ -267,13 +277,13 @@ export default function AuthScreen() {
           {mode === 'login' && (
             <Text style={styles.hint}>
               Don't have an account?{' '}
-              <Text style={styles.hintLink} onPress={() => switchMode('signup')}>Sign up</Text>
+              <Text style={styles.hintLink} onPress={() => switchMode('signup')}>{WORDINGS.auth.signUp}</Text>
             </Text>
           )}
           {mode === 'signup' && (
             <Text style={styles.hint}>
               Already have an account?{' '}
-              <Text style={styles.hintLink} onPress={() => switchMode('login')}>Sign in</Text>
+              <Text style={styles.hintLink} onPress={() => switchMode('login')}>{WORDINGS.auth.signIn}</Text>
             </Text>
           )}
         </>

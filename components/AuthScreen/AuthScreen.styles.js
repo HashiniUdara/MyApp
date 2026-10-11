@@ -24,6 +24,7 @@ export default createThemedStyleSheet((colors) => ({
   },
 
   error: { color: colors.danger, fontSize: 13, marginBottom: 12, textAlign: 'center' },
+  fieldError: { color: colors.danger, fontSize: 12, marginTop: -6, marginBottom: 12 },
 
   btn:         { backgroundColor: colors.primary, borderRadius: 14, paddingVertical: 15, alignItems: 'center', marginTop: 8 },
   btnDisabled: { opacity: 0.6 },

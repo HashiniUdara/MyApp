@@ -149,6 +149,9 @@ export const WORDINGS = {
     quickAccess: 'Customize Quick Access',
   },
   auth: {
+    signUp: 'Sign up',
+    signIn: 'Sign in',
+    Password: 'Password',
     forgotPassword: 'Forgot password?',
     backToSignIn: 'Back to sign in',
     resetTitle: 'Reset your password',
@@ -178,6 +181,9 @@ export const WORDINGS = {
     confirmNewPasswordLabel: 'Confirm New Password',
     confirmNewPasswordPlaceholder: 'Repeat your password',
     updatePassword: 'Update Password',
+    confirmPassword: 'Confirm Password',
+    inlineMessage:'An account with this email already exists.',
+    backToSignIn: 'Sign in instead',
   },
   errors: {
     auth: 'Auth error',

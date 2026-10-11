@@ -28,6 +28,12 @@ async function authPost(endpoint, body) {
 
 export async function signUp(email, password) {
   const data = await authPost('signup', { email, password });
+  // Supabase hides whether an email exists: for an already-registered email it
+  // returns a "successful" response whose user has an empty identities array.
+  const u = data.user ?? data;
+  if (Array.isArray(u?.identities) && u.identities.length === 0) {
+    throw new Error('User already registered');
+  }
   if (data.access_token) setAuthToken(data.access_token);
   return data;
 }
